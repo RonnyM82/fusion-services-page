@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="referrer" content="no-referrer">
+<title>Livetools proposal — Kennewell CNC Machining</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --lt-surface-page:#FFFFFF;
+  --lt-surface-subtle:#F8F8F8;
+  --lt-surface-panel:#FFFFFF;
+  --lt-surface-shell:#2A2A2A;
+  --lt-text-on-shell:#EEEEEE;
+  --lt-text-on-shell-muted:#A8A8A8;
+  --lt-text-primary:#2A2A2A;
+  --lt-text-secondary:#565554;
+  --lt-border-interactive:#868686;
+  --lt-border-subtle:#DEDEDE;
+  --lt-action:#1F1BAB;
+  --lt-action-bg-hover:#180098;
+  --lt-text-link:#17058F;
+  --lt-brand-red:#ED1C24;
+  --lt-warning-text:#724700;
+  --lt-warning-fill:#F5A300;
+}
+
+*{box-sizing:border-box;}
+
+html{-webkit-text-size-adjust:100%;}
+
+body{
+  margin:0;
+  background:var(--lt-surface-page);
+  color:var(--lt-text-primary);
+  font-family:"Inter",Arial,Helvetica,sans-serif;
+  font-feature-settings:"ss02" 1;
+  font-size:18px;
+  line-height:1.6;
+}
+
+.num{font-feature-settings:"ss02" 1,"tnum" 1;}
+
+.mono{
+  font-family:"JetBrains Mono",Cascadia Mono,Consolas,"Courier New",monospace;
+  font-feature-settings:"zero" 1;
+}
+
+/* ---------- shell ---------- */
+
+.lt-shell{
+  background:var(--lt-surface-shell);
+  color:var(--lt-text-on-shell);
+  padding:44px 32px 40px;
+}
+
+.shell-inner{max-width:780px;margin:0 auto;}
+
+.logotype{
+  display:block;
+  width:200px;
+  height:auto;
+  margin:0 0 30px;
+}
+
+.lt-shell h1{
+  font-weight:900;
+  font-size:44px;
+  line-height:1.1;
+  letter-spacing:-0.02em;
+  margin:0 0 24px;
+  color:var(--lt-text-on-shell);
+  max-width:16ch;
+}
+
+.meta{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:4px 20px;
+  margin:0;
+  font-size:16px;
+}
+
+.meta dt{
+  color:var(--lt-text-on-shell-muted);
+  font-weight:500;
+}
+
+.meta dd{margin:0;color:var(--lt-text-on-shell);}
+
+/* ---------- panel ---------- */
+
+.lt-panel{
+  background:var(--lt-surface-panel);
+  max-width:780px;
+  margin:0 auto;
+  padding:48px 32px 80px;
+}
+
+.lede{
+  font-size:21px;
+  line-height:1.55;
+  margin:0 0 8px;
+  max-width:60ch;
+}
+
+p{max-width:68ch;}
+
+h2{
+  font-weight:700;
+  font-size:30px;
+  line-height:1.2;
+  letter-spacing:-0.015em;
+  margin:56px 0 20px;
+  padding-top:28px;
+  border-top:1px solid var(--lt-border-subtle);
+}
+
+h2 .idx{
+  color:var(--lt-action);
+  font-family:"JetBrains Mono",Consolas,monospace;
+  font-feature-settings:"zero" 1;
+  font-size:1em;
+  margin-right:14px;
+}
+
+h3{
+  font-weight:700;
+  font-size:19px;
+  margin:32px 0 6px;
+}
+
+ul{padding-left:22px;margin:16px 0;max-width:66ch;}
+li{margin-bottom:8px;}
+
+.label{
+  font-weight:700;
+  margin-bottom:2px;
+}
+
+/* ---------- price callout ---------- */
+
+.price{
+  border-left:4px solid var(--lt-action);
+  background:var(--lt-surface-subtle);
+  padding:16px 20px;
+  margin:28px 0;
+  max-width:66ch;
+}
+
+.price .figure{
+  font-family:"JetBrains Mono",Consolas,monospace;
+  font-feature-settings:"zero" 1,"tnum" 1;
+  font-size:26px;
+  font-weight:700;
+  color:var(--lt-action);
+  display:block;
+  line-height:1.2;
+}
+
+.price .qualifier{
+  display:block;
+  font-size:16px;
+  color:var(--lt-text-secondary);
+  margin-top:4px;
+}
+
+/* ---------- optional block ---------- */
+
+.optional{
+  border:1px solid var(--lt-border-subtle);
+  padding:20px 22px;
+  margin:28px 0;
+  max-width:66ch;
+}
+
+.optional p:last-child{margin-bottom:0;}
+.optional p:first-child{margin-top:0;}
+
+/* ---------- table ---------- */
+
+.table-wrap{overflow-x:auto;margin:24px 0;}
+
+table{
+  border-collapse:collapse;
+  width:100%;
+  font-size:17px;
+}
+
+thead th{
+  text-align:left;
+  font-weight:700;
+  border-bottom:2px solid var(--lt-border-interactive);
+  padding:10px 12px;
+}
+
+thead th:last-child{text-align:right;}
+
+tbody td{
+  border-bottom:1px solid var(--lt-border-subtle);
+  padding:11px 12px;
+  vertical-align:top;
+}
+
+tbody tr:nth-child(even){background:var(--lt-surface-subtle);}
+
+td.figure{
+  text-align:right;
+  white-space:nowrap;
+  font-family:"JetBrains Mono",Consolas,monospace;
+  font-feature-settings:"zero" 1,"tnum" 1;
+  font-weight:500;
+}
+
+td.sub{color:var(--lt-text-secondary);font-size:16px;}
+
+/* ---------- placeholder ---------- */
+
+.fill{
+  background:var(--lt-warning-fill);
+  color:var(--lt-text-primary);
+  padding:1px 7px;
+  font-weight:500;
+  font-size:0.92em;
+  white-space:nowrap;
+}
+
+.fill::before{content:"fill in: ";font-weight:700;}
+
+/* ---------- footer ---------- */
+
+.next{
+  border-top:1px solid var(--lt-border-subtle);
+  margin-top:56px;
+  padding-top:28px;
+}
+
+a{color:var(--lt-text-link);}
+a:hover{color:var(--lt-action-bg-hover);}
+a:focus-visible{outline:3px solid var(--lt-action);outline-offset:2px;}
+
+.secondary{color:var(--lt-text-secondary);}
+
+@media (max-width:640px){
+  body{font-size:17px;}
+  .lt-shell{padding:32px 20px 28px;}
+  .lt-shell h1{font-size:32px;}
+  .lt-panel{padding:36px 20px 56px;}
+  h2{font-size:25px;margin-top:44px;}
+  .lede{font-size:19px;}
+  .price .figure{font-size:23px;}
+}
+
+@media print{
+  body{font-size:11pt;}
+  .lt-shell{
+    padding:24pt 0;
+    background-image:none;
+    background-color:var(--lt-surface-shell);
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  .lt-panel{padding:18pt 0;max-width:none;}
+  h2{page-break-after:avoid;margin-top:24pt;}
+  .price,.optional,table{page-break-inside:avoid;}
+  .fill{border:1px solid var(--lt-text-primary);}
+}
+</style>
+</head>
+<body>
+
+<header class="lt-shell">
+  <div class="shell-inner">
+    <img class="logotype" alt="Livetools" width="752" height="108" src="data:image/webp;base64,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cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjUuMCAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDI2LTA4LTI3VDA2OjM1OjU5KzA4OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyNi0wOC0yN1QwNjozNjoxNiswODowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyNi0wOC0yN1QwNjozNjoxNiswODowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2MjMxM2QtOGEyMy0zZDQxLWFlN2UtZjU0MzMyNTFhNDMwIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOmFkNjIzMTNkLThhMjMtM2Q0MS1hZTdlLWY1NDMzMjUxYTQzMCIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOmFkNjIzMTNkLThhMjMtM2Q0MS1hZTdlLWY1NDMzMjUxYTQzMCI+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2MjMxM2QtOGEyMy0zZDQxLWFlN2UtZjU0MzMyNTFhNDMwIiBzdEV2dDp3aGVuPSIyMDI2LTA4LTI3VDA2OjM1OjU5KzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjUuMCAoV2luZG93cykiLz4gPC9yZGY6U2VxPiA8L3htcE1NOkhpc3Rvcnk+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+">
+    <h1>Getting your five-axis Okuma earning</h1>
+    <dl class="meta">
+      <dt>For</dt><dd>Kennewell CNC Machining, Murray Bridge, South Australia</dd>
+      <dt>From</dt><dd>Scott Moyse, Livetools</dd>
+      <dt>Date</dt><dd>2 September 2026</dd>
+    </dl>
+  </div>
+</header>
+
+<main class="lt-panel">
+
+  <p class="lede">Having just taken delivery of your first 5-axis Okuma mill, three things need sorting to accelerate commissioning; a machine simulation configuration you can trust, a post that outputs code your control is happy with and the Fusion toolpath knowledge to drive it. Here's how I'd suggest getting there in a cost effective and sustainable way.</p>
+
+  <h2><span class="idx">1</span>Machine simulation setup in Fusion</h2>
+
+  <p>Okuma have already handed you the 3D model, which saves a solid chunk of work. What it won't be is ready to use. Those models arrive loaded with fixture detail, fasteners and cosmetic geometry that'll bog Fusion down.</p>
+
+  <p class="label">What I'll do:</p>
+  <ul>
+    <li>Simplify and prepare the Okuma model for use in Fusion</li>
+    <li>Build the machine definition, with kinematics and travel limits taken from your Okuma documentation</li>
+    <li>Configure the collision bodies that matter</li>
+    <li>Validate the finished definition against a known collision</li>
+  </ul>
+
+  <div class="price">
+    <span class="figure">$625</span>
+  </div>
+
+  <div class="optional">
+    <p class="label">Optional: workholding configuration and cleanup</p>
+    <p>I'll clean up and configure your vices, chucks and fixtures so they're usable in simulation, working from models you supply. <span class="num">$125</span> per setup. Tell me how many you want covered up front, or we can do them as they come up.</p>
+  </div>
+
+  <h2><span class="idx">2</span>Five-axis post processor</h2>
+
+  <p>I'll start from the Autodesk post for your control.</p>
+
+  <p>Configuration covers rotary axis output and limits, linearisation tolerance, safe retract and repositioning moves, work offset handling, coolant and canned cycle mapping (where supported), and the program header to suit your shop.</p>
+
+  <p>Post work is the least predictable part of the job. The base configuration is quick. What eats time is the back and forth once you're actually cutting, because every shop turns up edge cases the base post has never met. So I've scoped it as a base configuration plus three rounds of changes after initial delivery, each one worked off your feedback with test programs to prove it. Past that, we agree more time.</p>
+
+  <p>Machine-side testing is done by your operator once the machine is commissioned. I work from the feedback and results that come back off those runs. If you want me on site to support the proving, travel and expenses are chargeable on top.</p>
+
+  <p>Any custom requirements relating to robot integration sit outside this. I'd need to assess those separately and would likely quote them on their own.</p>
+
+  <p>The post is supplied unencrypted and fully version controlled via GitHub, so you can read it, see exactly what changed between revisions, and roll back if you need to.</p>
+
+  <div class="price">
+    <span class="figure">$2,750</span>
+    <span class="qualifier">Including 3 x 1 hour revision rounds after initial delivery.</span>
+  </div>
+
+  <h2><span class="idx">3</span>Advanced Fusion CAM training for simultaneous five-axis</h2>
+
+  <p>Four half-day modules.</p>
+
+  <h3>Module 1: Setting up for multi-axis</h3>
+  <p>Tool orientation and work coordinate setup for five-axis, then retract and linking strategy. A lot of multi-axis crashes happen around linking and repositioning moves, so knowing how to control them matters.</p>
+
+  <h3>Module 2: The toolpath catalogue</h3>
+  <p>5-axis controls in 3D toolpaths, multi-axis clearing, advanced swarf, and multi-axis finishing. The focus is on picking the right strategy for the job in front of you.</p>
+
+  <h3>Module 3: Surface modelling to drive toolpaths</h3>
+  <p>Understanding surface topology, building drive and check surfaces, patch and loft techniques for geometry that exists purely to steer the cutter, guide curves and boundary surfaces to control tilt and lead-lag. Most of the control you get over a five-axis toolpath comes from geometry you model yourself.</p>
+
+  <h3>Module 4: Your parts, start to finish</h3>
+  <p>We program a real job of yours end to end, verify it in the machine simulation, post it, and prove it.</p>
+
+  <p>Send me two or three representative parts ahead of time, ideally the ones you've already had a go at and got stuck on. I'll provide baseline datasets as well so we're not stalled if your parts turn out to be awkward teaching examples.</p>
+
+  <p>Nobody can promise you'll be five-axis experts after only two days of training. What you'll have is an understanding of the underlying concept of how these toolpaths work, a working method for picking the right strategy, and the means to prove it in simulation before it goes near the machine.</p>
+
+  <p>The four modules are quoted as a block, not individually. They build on each other and module four leans on the first three, so cherry-picking one or two would leave you short.</p>
+
+  <div class="price">
+    <span class="figure">$3,600</span>
+    <span class="qualifier">Four half-days at an <span class="num">$1,800</span> day rate.</span>
+  </div>
+
+  <h2>Options</h2>
+
+  <h3>On-site delivery at Murray Bridge</h3>
+  <p><span class="num">$2,720</span> for travel and expenses, on top of the training and post prices. That covers arriving mid-afternoon on the Tuesday and three full days on site.</p>
+
+  <p>The three days cover the two days of training plus the post work. Doing it this way means proving the post out in person, with changes made in real time instead of waiting on a round of feedback between us.</p>
+
+  <p>On-site days tend to run longer than remote ones, and there's usually extra work done in the evenings, so you get more out of the visit than the schedule suggests.</p>
+
+  <p>The travel figure is based on booking 2 to 4 weeks out for mid-September or mid-October, which keeps us clear of the Australian school holidays.</p>
+
+  <h3>Modifying your own posts with AI</h3>
+  <p>Half a day. <span class="num">$1,000</span>. I'll provide a Skills framework, hosted in GitHub, for your AI of choice to use, and show you how to make sensible changes to your own post: output formatting, program numbering, canned cycle preferences, comment blocks, and the other small changes you'd otherwise be emailing me about.</p>
+
+  <p>This covers changes inside the structure of the existing post, and I'll show you how to test them, because AI will very happily write you confident, broken post code.</p>
+
+  <h2>What I need from you</h2>
+  <ul>
+    <li>Machine documentation from Okuma: axis travels, rotary centre distances, and the model file they supplied</li>
+    <li>An agreed list of any post functionality outside of the ordinary, so it's scoped before I start rather than found halfway through</li>
+    <li>Two or three of your own parts before module four</li>
+    <li>Operator feedback and results from your proving runs, so I can work the revision rounds off something real</li>
+  </ul>
+
+  <h2>Pricing</h2>
+
+  <p>All prices in AUD, exclusive of GST. Australian GST will be added, as Livetools is billing you. Training is charged at an <span class="num">$1,800</span> day rate.</p>
+
+  <div class="table-wrap">
+  <table>
+    <caption class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Proposal pricing, all figures in AUD excluding GST</caption>
+    <thead>
+      <tr>
+        <th scope="col">Item</th>
+        <th scope="col">Allocation</th>
+        <th scope="col">Delivery</th>
+        <th scope="col">Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Machine simulation setup</td>
+        <td class="sub"></td>
+        <td class="sub">Remote</td>
+        <td class="figure">$625</td>
+      </tr>
+      <tr>
+        <td>Workholding configuration and cleanup</td>
+        <td class="sub"></td>
+        <td class="sub">Optional</td>
+        <td class="figure">$125 per setup</td>
+      </tr>
+      <tr>
+        <td>Five-axis post configuration, including 3 revision rounds</td>
+        <td class="sub"></td>
+        <td class="sub">Remote / Onsite</td>
+        <td class="figure">$2,750</td>
+      </tr>
+      <tr>
+        <td>Advanced five-axis training, quoted as a block</td>
+        <td class="sub">4 half-days</td>
+        <td class="sub">Remote / Onsite</td>
+        <td class="figure">$3,600</td>
+      </tr>
+      <tr>
+        <td>On-site delivery: travel and expenses</td>
+        <td class="sub">3 full days on site</td>
+        <td class="sub">Murray Bridge</td>
+        <td class="figure">$2,720</td>
+      </tr>
+      <tr>
+        <td>Post modification with AI</td>
+        <td class="sub">Half day</td>
+        <td class="sub">Optional</td>
+        <td class="figure">$1,000</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="next">
+    <h2 style="margin-top:0;padding-top:0;border-top:none;">Next step</h2>
+    <p>Tell me which parts you want and I'll get dates in the diary.</p>
+    <p>Questions, flick me an email at <a href="mailto:scott@livetools.com.au">scott@livetools.com.au</a>.</p>
+  </div>
+
+</main>
+
+</body>
+</html>
