@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How Git works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Livetools palette and type, matching the proposal and handover pages. Light only, like them. */
+:root{
+  --bg:#F8F8F8; --surface:#FFFFFF; --surface-2:#EEEEEE; --ink:#2A2A2A; --muted:#565554; --rule:#DEDEDE;
+  --term-bg:#2A2A2A; --term-ink:#EEEEEE; --term-dim:#A8A8A8; --term-ok:#9AD8A2; --term-err:#FFABA1;
+  --l0:#1F1BAB; --l1:#ED1C24; --l2:#0B8535; --l3:#7A00D3; --merge:#868686; --on-accent:#FFFFFF;
+  --l1-strong:#D9000A; --amber:#F5A300;
+  --link:#17058F; --link-hover:#180098;
+  --focus:#1F1BAB;
+  --sans:"Inter", Arial, Helvetica, sans-serif;
+  --cond:"Inter", Arial, Helvetica, sans-serif;
+  --mono:"JetBrains Mono", "Cascadia Mono", Consolas, "Courier New", monospace;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-feature-settings:"ss02" 1;font-size:17px;line-height:1.62}
+img,svg{max-width:100%}
+a{color:var(--link)}
+a:hover{color:var(--link-hover)}
+code{font-family:var(--mono);font-feature-settings:"zero" 1;font-size:.88em}
+p code,li code,dd code,td code{background:var(--surface-2);padding:1px 5px;border-radius:4px}
+
+/* The page is drawn as a commit history: one line down the left, one station per chapter */
+.page{max-width:1040px;margin:0 auto;padding:64px 24px 96px 96px;position:relative}
+.page::before{content:"";position:absolute;left:44px;top:72px;bottom:120px;width:4px;border-radius:2px;background:var(--l0)}
+.station{position:absolute;left:-66px;top:6px;width:32px;height:32px;border-radius:50%;
+  background:var(--surface);border:4px solid var(--l0);display:grid;place-items:center;
+  font:500 13px/1 var(--mono);color:var(--ink)}
+.station.start{background:var(--l0);width:36px;height:36px;left:-68px;top:10px}
+.station.end{top:2px}
+
+.hero{position:relative;max-width:46rem}
+h1{font-family:var(--cond);font-weight:900;font-size:clamp(2.4rem,6vw,3.8rem);line-height:1.05;letter-spacing:-.02em;margin:0 0 24px}
+.lede{font-size:1.2rem;line-height:1.55;margin:0 0 16px;max-width:40rem}
+.muted{color:var(--muted)}
+
+section.chapter{position:relative;margin-top:96px}
+h2{font-family:var(--cond);font-weight:700;font-size:clamp(1.6rem,3.4vw,2rem);line-height:1.2;margin:0 0 18px;letter-spacing:-.015em}
+h3{font-size:1.02rem;font-weight:600;margin:0 0 4px}
+.prose{max-width:40rem}
+.prose p{margin:0 0 16px}
+.hint{max-width:40rem;margin:20px 0 0;padding:12px 16px;border-left:4px solid var(--merge);background:var(--surface);border-radius:0 8px 8px 0}
+
+.terms{margin:0 0 18px;max-width:40rem}
+.terms div{padding:10px 0;border-top:1px solid var(--rule)}
+.terms div:last-child{border-bottom:1px solid var(--rule)}
+.terms dt{font-weight:600;display:inline}
+.terms dd{display:inline;margin:0}
+.terms dt::after{content:": "}
+
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:8px 0 0;max-width:46rem}
+.duo > div{background:var(--surface);border:1px solid var(--rule);border-left:5px solid var(--l0);border-radius:6px 10px 10px 6px;padding:14px 16px}
+.duo > div + div{border-left-color:var(--l1)}
+.duo p{margin:0;font-size:.95rem;color:var(--muted)}
+
+/* Playgrounds */
+.lab{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:18px;margin:28px 0 0}
+.lab-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.lab-title{font-weight:600}
+.lab-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+.btn{font:500 .9rem/1.2 var(--sans);color:var(--ink);background:var(--surface-2);border:1px solid var(--rule);
+  border-radius:8px;padding:8px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn:hover:not(:disabled){border-color:var(--muted)}
+.btn code{font-size:12px;opacity:.72;background:none;padding:0}
+.btn.primary{background:var(--l0);border-color:var(--l0);color:var(--on-accent)}
+.btn.small{padding:4px 9px;font-size:.82rem}
+.btn.quiet{background:transparent}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+select,input[type=text]{font:inherit;font-size:.9rem;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:8px;padding:7px 9px}
+.inline{display:inline-flex;align-items:center;gap:6px;font-size:.9rem}
+
+.term{background:var(--term-bg);color:var(--term-ink);font:13.5px/1.55 var(--mono);border-radius:10px;padding:12px 14px;
+  height:168px;overflow:auto;margin-top:14px;white-space:pre-wrap;word-break:break-word}
+.term .cmd::before{content:"$ ";color:var(--term-dim)}
+.term .cmd[data-who]::before{content:attr(data-who) " $ "}
+.term .out{color:var(--term-dim)}
+.term .ok{color:var(--term-ok)}
+.term .err{color:var(--term-err)}
+.term .note{color:var(--term-dim);font-style:italic}
+
+/* Lab A */
+.zones{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.zone{background:var(--bg);border-radius:10px;padding:14px;display:flex;flex-direction:column;min-height:230px}
+.zone-sub{margin:0 0 12px;font-size:.85rem;color:var(--muted)}
+.file,.commit-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--rule);background:var(--surface);
+  border-radius:8px;margin-bottom:8px;font-size:.9rem;flex-wrap:wrap}
+.fname{font-family:var(--mono);font-size:.85rem;flex:1;min-width:6rem}
+.badge{font-size:.75rem;padding:1px 8px;border-radius:99px;background:var(--surface-2);color:var(--muted)}
+.badge.edited{background:color-mix(in srgb,var(--amber) 30%,transparent);color:var(--ink)}
+.badge.staged{background:color-mix(in srgb,var(--l2) 22%,transparent);color:var(--ink)}
+.file-btns{display:flex;gap:6px}
+.empty{font-size:.85rem;color:var(--muted);margin:0 0 8px}
+.field{display:flex;flex-direction:column;gap:4px;margin:auto 0 10px;font-size:.8rem;color:var(--muted)}
+.commit-row code{color:var(--l0);font-size:.8rem}
+.commit-row span{flex:1}
+
+/* Lab B */
+.graph-wrap{overflow-x:auto;background:var(--bg);border-radius:10px;margin-top:14px;padding:4px 0}
+.graph-wrap svg{display:block;max-width:none}
+.graph-key{font-size:.88rem;color:var(--muted);margin:10px 0 0}
+
+/* Lab C */
+.remote-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.machine{background:var(--bg);border-radius:10px;padding:14px;display:flex;flex-direction:column}
+.machine.hub{border:2px dashed var(--rule)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-height:34px;margin:8px 0}
+.chip{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:500 12px/1 var(--mono);
+  border:2px solid transparent}
+.chip.base{background:var(--surface-2);color:var(--ink);border-color:var(--rule)}
+.chip.you{background:var(--l0);color:var(--on-accent)}
+.chip.ben{background:var(--l1-strong);color:var(--on-accent)}
+.chip.merge{background:var(--surface);border-color:var(--merge);color:var(--ink)}
+.mstatus{font-size:.85rem;color:var(--muted);margin:0 0 12px;flex:1}
+.mbtns{display:flex;flex-wrap:wrap;gap:6px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.82rem;color:var(--muted);margin-top:12px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .chip{width:16px;height:16px;font-size:0}
+
+/* Team workflow drawn as a branch */
+.flow{list-style:none;counter-reset:s;margin:24px 0 0;padding:0 0 0 36px;position:relative;max-width:44rem}
+.flow::before{content:"";position:absolute;left:11px;top:14px;bottom:14px;width:4px;border-radius:2px;background:var(--l1)}
+.flow li{position:relative;padding:0 0 26px;counter-increment:s}
+.flow li::before{content:counter(s);position:absolute;left:-36px;top:0;width:26px;height:26px;border-radius:50%;
+  background:var(--surface);border:3px solid var(--l1);display:grid;place-items:center;font:500 12px/1 var(--mono)}
+.flow h3{font-size:1.05rem;margin:0 0 4px;padding-top:1px}
+.flow p{margin:0 0 8px}
+
+pre.code{background:var(--term-bg);color:var(--term-ink);font:14px/1.6 var(--mono);padding:12px 14px;border-radius:8px;overflow-x:auto;margin:8px 0 0;max-width:44rem}
+pre.code .c{color:var(--term-dim)}
+pre.conflict .mk{color:var(--term-err)}
+
+.steps-plain{max-width:40rem;padding-left:22px;margin:0 0 16px}
+.steps-plain li{margin-bottom:6px}
+
+.table-wrap{overflow-x:auto;max-width:52rem;margin-top:8px}
+table{border-collapse:collapse;width:100%;font-size:.94rem}
+th,td{text-align:left;padding:10px 12px 10px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;font-size:.85rem;color:var(--muted)}
+td:first-child{white-space:nowrap}
+td:first-child code{background:none;padding:0;color:var(--l0);font-weight:500}
+
+.closing{margin-top:48px;max-width:40rem;font-size:1.1rem}
+
+@media (max-width:820px){
+  .zones,.remote-grid{grid-template-columns:1fr}
+  .zone{min-height:0}
+  .field{margin-top:8px}
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  .page{padding:40px 18px 72px 18px}
+  .page::before{display:none}
+  .station{position:static;display:inline-grid;margin:0 0 12px;width:30px;height:30px}
+  .station.start{display:none}
+  .duo{grid-template-columns:1fr}
+  section.chapter{margin-top:72px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .btn{transition:border-color .15s}
+}
+</style>
+</head>
+<body>
+<main class="page">
+
+<header class="hero">
+  <span class="station start" aria-hidden="true"></span>
+  <h1>How Git works</h1>
+  <p class="lede">Git keeps every saved version of a project, and lets several people work on the same files without overwriting each other. This guide builds the idea up one piece at a time, with a small playground in each chapter: click the buttons, watch what changes, and read the commands Git would run.</p>
+  <p class="muted">The blue line down the side is how Git draws history: each dot is a saved version. By the end you'll be reading these diagrams without thinking about it.</p>
+</header>
+
+<section class="chapter" aria-labelledby="c1">
+  <span class="station" aria-hidden="true">1</span>
+  <h2 id="c1">What Git is, and what GitHub is</h2>
+  <div class="prose">
+    <p>If you've used version history in Fusion, you already know the core idea: every save is a version you can go back to. Git does the same for a whole folder of files (code, post processors, docs, anything text-based) with two differences. You decide when a version is worth keeping, and you write a short note saying what changed.</p>
+    <p>A folder Git is tracking is called a <strong>repository</strong>, or repo. Its full history lives inside it, in a hidden folder called <code>.git</code>. Nothing leaves your computer unless you send it somewhere.</p>
+    <p>GitHub is a separate thing: a website that holds a copy of your repository so other people can get it, add to it and discuss changes.</p>
+  </div>
+  <div class="duo">
+    <div><h3>Git</h3><p>A program on your computer. Tracks history, makes branches, merges work. Runs offline.</p></div>
+    <div><h3>GitHub</h3><p>A website. Holds the shared copy, and adds pull requests, code review and permissions on top. GitLab and Bitbucket do the same job.</p></div>
+  </div>
+</section>
+
+<section class="chapter" aria-labelledby="c2">
+  <span class="station" aria-hidden="true">2</span>
+  <h2 id="c2">Saving a version takes two steps</h2>
+  <div class="prose">
+    <p>Git doesn't save every keystroke. You choose which changes go into the next saved version, called a <strong>commit</strong>. Your work moves through three places:</p>
+  </div>
+  <dl class="terms">
+    <div><dt>Working folder</dt><dd>the files as you see them in your editor.</dd></div>
+    <div><dt>Staging area</dt><dd>the changes you've picked for the next commit (<code>git add</code>).</dd></div>
+    <div><dt>History</dt><dd>the commits (<code>git commit</code>). Each one is a snapshot with a message, an author and a short ID.</dd></div>
+  </dl>
+  <div class="prose">
+    <p>Why the middle step? You might change three files, but only two belong together. Staging lets you commit those two as one tidy change and leave the third for later.</p>
+  </div>
+
+  <div class="lab" id="labA">
+    <div class="lab-bar"><span class="lab-title">Playground: save a version</span><button class="btn quiet small" id="aReset">Reset</button></div>
+    <div class="zones">
+      <div class="zone">
+        <h3>Working folder</h3><p class="zone-sub">Your files as they are now</p>
+        <div id="aWork"></div>
+      </div>
+      <div class="zone">
+        <h3>Staging area</h3><p class="zone-sub">Picked for the next commit</p>
+        <div id="aStage"></div>
+        <label class="field">Commit message<input id="aMsg" type="text" maxlength="60"></label>
+        <button class="btn primary" id="aCommit">Commit <code>git commit</code></button>
+      </div>
+      <div class="zone">
+        <h3>History</h3><p class="zone-sub">Saved commits, newest first</p>
+        <div id="aHist"></div>
+      </div>
+    </div>
+    <div class="lab-actions"><button class="btn" id="aStatus">Check status <code>git status</code></button></div>
+    <div class="term" id="aTerm" aria-live="polite"></div>
+  </div>
+  <p class="hint">Try this: edit <code>post.cps</code> and <code>notes.txt</code>, stage only <code>post.cps</code>, then commit. Check the status to see what's still waiting.</p>
+</section>
+
+<section class="chapter" aria-labelledby="c3">
+  <span class="station" aria-hidden="true">3</span>
+  <h2 id="c3">Branches let you try things safely</h2>
+  <div class="prose">
+    <p>A <strong>branch</strong> is a separate line of work. The main line is usually called <code>main</code>. When you start something new, you make a branch and commit on it as much as you like while <code>main</code> stays untouched. When the work is ready, you <strong>merge</strong> the branch back in.</p>
+    <p>Under the hood a branch is just a label pointing at a commit, so making one is instant and free. People make one for every task, however small. <strong>HEAD</strong> is Git's name for where you are right now: the branch your next commit lands on.</p>
+  </div>
+
+  <div class="lab" id="labB">
+    <div class="lab-bar"><span class="lab-title">Playground: branch and merge</span><button class="btn quiet small" id="bReset">Reset</button></div>
+    <div class="lab-actions" style="margin-top:0">
+      <button class="btn primary" id="bCommit">Commit <code>git commit</code></button>
+      <button class="btn" id="bBranch">New branch <code>git switch -c</code></button>
+      <label class="inline">Switch to <select id="bSwitch" aria-label="Switch to branch"></select></label>
+      <span class="inline"><button class="btn" id="bMerge">Merge <code>git merge</code></button><select id="bMergeSel" aria-label="Branch to merge in"></select> into the current branch</span>
+    </div>
+    <div class="graph-wrap" id="bWrap"><svg id="bSvg" role="img"></svg></div>
+    <p class="graph-key" id="bKey"></p>
+    <div class="term" id="bTerm" aria-live="polite"></div>
+  </div>
+  <p class="hint">Try this: make a branch and commit twice. Switch back to <code>main</code>, commit once, then merge the branch in and watch the two lines join. Then make another branch, commit on it, and merge it while <code>main</code> hasn't moved: Git just slides the label forward, called a fast-forward.</p>
+</section>
+
+<section class="chapter" aria-labelledby="c4">
+  <span class="station" aria-hidden="true">4</span>
+  <h2 id="c4">Sharing work: push and pull</h2>
+  <div class="prose">
+    <p>Everyone on a team has their own complete copy of the repository. GitHub holds the shared copy, which Git calls <code>origin</code>. Three commands move commits between them:</p>
+  </div>
+  <dl class="terms">
+    <div><dt><code>git clone</code></dt><dd>download a repository the first time.</dd></div>
+    <div><dt><code>git push</code></dt><dd>send your new commits up to GitHub.</dd></div>
+    <div><dt><code>git pull</code></dt><dd>bring down commits other people pushed, and merge them into your copy.</dd></div>
+  </dl>
+  <div class="prose">
+    <p>The rule that catches everyone at first: GitHub won't accept your push if it has commits you don't have yet. You pull, Git combines the two histories, then you push.</p>
+  </div>
+
+  <div class="lab" id="labC">
+    <div class="lab-bar"><span class="lab-title">Playground: you, GitHub and a teammate</span><button class="btn quiet small" id="cReset">Reset</button></div>
+    <div class="remote-grid">
+      <div class="machine">
+        <h3>Your laptop</h3>
+        <div class="chips" id="cYou"></div>
+        <p class="mstatus" id="cYouS"></p>
+        <div class="mbtns">
+          <button class="btn small" data-who="you" data-act="commit">Commit</button>
+          <button class="btn small" data-who="you" data-act="push">Push <code>git push</code></button>
+          <button class="btn small" data-who="you" data-act="pull">Pull <code>git pull</code></button>
+        </div>
+      </div>
+      <div class="machine hub">
+        <h3>GitHub (origin)</h3>
+        <div class="chips" id="cOrigin"></div>
+        <p class="mstatus">The shared copy. Everyone pushes to it and pulls from it.</p>
+      </div>
+      <div class="machine">
+        <h3>Ben's laptop</h3>
+        <div class="chips" id="cBen"></div>
+        <p class="mstatus" id="cBenS"></p>
+        <div class="mbtns">
+          <button class="btn small" data-who="ben" data-act="commit">Commit</button>
+          <button class="btn small" data-who="ben" data-act="push">Push <code>git push</code></button>
+          <button class="btn small" data-who="ben" data-act="pull">Pull <code>git pull</code></button>
+        </div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="chip base"></i>Starting point</span>
+      <span><i class="chip you"></i>Your commits</span>
+      <span><i class="chip ben"></i>Ben's commits</span>
+      <span><i class="chip merge"></i>Merge commits</span>
+    </div>
+    <div class="term" id="cTerm" aria-live="polite"></div>
+  </div>
+  <p class="hint">Try this: Ben commits and pushes. Then you commit and push. Your push is rejected. Pull, then push again. Finally, have Ben pull so everyone matches.</p>
+</section>
+
+<section class="chapter" aria-labelledby="c5">
+  <span class="station" aria-hidden="true">5</span>
+  <h2 id="c5">How a team works together</h2>
+  <div class="prose">
+    <p>Most teams follow the same loop, built around <strong>pull requests</strong>. A pull request (PR) is a page on GitHub that says: here's my branch, please review it and merge it into <code>main</code>. Teammates read the changes there, comment on specific lines and approve.</p>
+  </div>
+  <ol class="flow">
+    <li><h3>Get a copy of the project</h3><p>Only once per project.</p>
+<pre class="code">git clone https://github.com/your-team/project.git
+cd project</pre></li>
+    <li><h3>Start from the latest main</h3><p>So you're building on everyone's newest work.</p>
+<pre class="code">git switch main
+git pull</pre></li>
+    <li><h3>Make a branch for your task</h3><p>Name it after the job.</p>
+<pre class="code">git switch -c fix-feed-rounding</pre></li>
+    <li><h3>Work, and commit in small steps</h3><p>Small commits with clear messages are easy to review and easy to undo.</p>
+<pre class="code">git add post.cps
+git commit -m "Round feedrates to one decimal place"</pre></li>
+    <li><h3>Push your branch to GitHub</h3><p><code>-u</code> links your branch to the copy on GitHub, so next time plain <code>git push</code> is enough.</p>
+<pre class="code">git push -u origin fix-feed-rounding</pre></li>
+    <li><h3>Open a pull request</h3><p>GitHub shows a "Compare &amp; pull request" button after you push. Teammates review. If they ask for changes, commit and push again on the same branch and the PR updates itself.</p></li>
+    <li><h3>Merge, then tidy up</h3><p>Once it's approved, merge the PR on GitHub. Then bring <code>main</code> up to date locally and delete the finished branch.</p>
+<pre class="code">git switch main
+git pull
+git branch -d fix-feed-rounding</pre></li>
+  </ol>
+  <div class="prose"><p>The payoff: <code>main</code> always works, because nothing lands there until someone else has looked at it.</p></div>
+</section>
+
+<section class="chapter" aria-labelledby="c6">
+  <span class="station" aria-hidden="true">6</span>
+  <h2 id="c6">When two people change the same line</h2>
+  <div class="prose">
+    <p>Usually Git merges on its own. If you edited one part of a file and Ben edited another, both changes are kept. But if you both changed the same lines differently, Git can't know which is right, so it stops and asks you. That's a <strong>merge conflict</strong>. It's normal and fixable, not a sign you broke anything.</p>
+    <p>Say you run <code>git merge raise-feed-limit</code> and both branches changed the same line. Git marks the spot in the file:</p>
+  </div>
+<pre class="code conflict"><span class="mk">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
+var maxFeed = 5000;   <span class="c">// your version</span>
+<span class="mk">=======</span>
+var maxFeed = 8000;   <span class="c">// the incoming version</span>
+<span class="mk">&gt;&gt;&gt;&gt;&gt;&gt;&gt; raise-feed-limit</span></pre>
+  <div class="prose" style="margin-top:18px"><p>To resolve it:</p></div>
+  <ol class="steps-plain">
+    <li>Edit the file so it says what it should: one version, the other, or a mix.</li>
+    <li>Delete the three marker lines.</li>
+    <li>Stage the file: <code>git add post.cps</code></li>
+    <li>Finish the merge: <code>git commit</code></li>
+  </ol>
+  <div class="prose"><p>Conflicts stay small and rare if you pull often, keep branches short-lived, and tell teammates when you're about to rework a shared file.</p></div>
+</section>
+
+<section class="chapter" aria-labelledby="c7">
+  <span class="station end" aria-hidden="true">7</span>
+  <h2 id="c7">Cheat sheet</h2>
+  <h3>One-time setup</h3>
+<pre class="code">git config --global user.name "Scott Moyse"
+git config --global user.email "you@example.com"
+git config --global pull.rebase false</pre>
+  <div class="prose" style="margin-top:12px">
+    <p>Your name and email go on every commit. Use the same email as your GitHub account so commits link to your profile. The last line tells <code>git pull</code> to merge when histories have split, which is what the playground above shows. Newer versions of Git ask you to choose before they'll pull.</p>
+  </div>
+
+  <h3 style="margin-top:28px">Everyday commands</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>git status</code></td><td>Shows your branch and what's changed. Run it constantly.</td></tr>
+        <tr><td><code>git add &lt;file&gt;</code></td><td>Stages a file. <code>git add .</code> stages everything that changed.</td></tr>
+        <tr><td><code>git commit -m "…"</code></td><td>Saves the staged changes as a commit.</td></tr>
+        <tr><td><code>git diff</code></td><td>Shows changes you haven't staged yet, line by line.</td></tr>
+        <tr><td><code>git log --oneline --graph</code></td><td>Shows history as a graph, like the playground.</td></tr>
+        <tr><td><code>git switch &lt;branch&gt;</code></td><td>Moves to another branch.</td></tr>
+        <tr><td><code>git switch -c &lt;name&gt;</code></td><td>Creates a branch and moves to it.</td></tr>
+        <tr><td><code>git merge &lt;branch&gt;</code></td><td>Brings another branch's commits into the one you're on.</td></tr>
+        <tr><td><code>git clone &lt;url&gt;</code></td><td>Downloads a repository for the first time.</td></tr>
+        <tr><td><code>git pull</code></td><td>Gets new commits from GitHub and merges them in.</td></tr>
+        <tr><td><code>git push</code></td><td>Sends your commits to GitHub.</td></tr>
+        <tr><td><code>git restore --staged &lt;file&gt;</code></td><td>Unstages a file. Your edits stay.</td></tr>
+        <tr><td><code>git restore &lt;file&gt;</code></td><td>Throws away uncommitted edits to a file. This can't be undone.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="margin-top:28px">Words you'll hear</h3>
+  <dl class="terms">
+    <div><dt>Repository</dt><dd>a project folder plus its full history.</dd></div>
+    <div><dt>Commit</dt><dd>one saved snapshot, with a message, author and ID.</dd></div>
+    <div><dt>Branch</dt><dd>a movable label marking a line of work.</dd></div>
+    <div><dt>HEAD</dt><dd>where you are now; your next commit goes here.</dd></div>
+    <div><dt>Remote, origin</dt><dd>another copy of the repo, usually the one on GitHub.</dd></div>
+    <div><dt>Pull request</dt><dd>a request on GitHub to review and merge a branch.</dd></div>
+    <div><dt>Merge conflict</dt><dd>two changes to the same lines that you resolve by hand.</dd></div>
+    <div><dt><code>.gitignore</code></dt><dd>a file listing things Git should never track, like build output or passwords.</dd></div>
+  </dl>
+
+  <p class="closing">When you're unsure what's going on, run <code>git status</code>. It tells you where you are, what's changed, and usually suggests the next command.</p>
+</section>
+
+</main>
+
+<script>
+function hash(){return (Math.random().toString(16).slice(2)+'0000000').slice(0,7)}
+function Term(el){
+  return {
+    line(text,cls,who){const d=document.createElement('div');d.className=cls||'out';if(who)d.dataset.who=who;d.textContent=text;el.appendChild(d);el.scrollTop=el.scrollHeight;},
+    clear(){el.innerHTML='';}
+  };
+}
+function el(tag,attrs,text){const e=document.createElement(tag);if(attrs)for(const k in attrs){if(k==='class')e.className=attrs[k];else e.setAttribute(k,attrs[k]);}if(text!=null)e.textContent=text;return e;}
+
+/* ---------- Lab A: working folder, staging area, history ---------- */
+(function(){
+  const work=document.getElementById('aWork'),stage=document.getElementById('aStage'),hist=document.getElementById('aHist');
+  const msg=document.getElementById('aMsg'),commitBtn=document.getElementById('aCommit');
+  const T=Term(document.getElementById('aTerm'));
+  let files,history;
+
+  function init(){
+    files=[{name:'README.md'},{name:'post.cps'},{name:'notes.txt'}].map(f=>({...f,dirty:false,staged:false}));
+    history=[{hash:hash(),msg:'Initial commit'}];
+    T.clear();T.line('# What Git would print appears here. Start by editing a file.','note');
+    msg.value='';render();
+  }
+  function suggestion(){
+    const s=files.filter(f=>f.staged).map(f=>f.name);
+    if(!s.length)return'';
+    return 'Update '+(s.length===1?s[0]:s.slice(0,-1).join(', ')+' and '+s[s.length-1]);
+  }
+  function render(){
+    work.innerHTML='';
+    files.forEach(f=>{
+      const row=el('div',{class:'file'});
+      row.appendChild(el('span',{class:'fname'},f.name));
+      let b='unchanged',cls='badge';
+      if(f.staged&&f.dirty){b='staged, edited again';cls+=' edited';}
+      else if(f.staged){b='staged';cls+=' staged';}
+      else if(f.dirty){b='edited';cls+=' edited';}
+      row.appendChild(el('span',{class:cls},b));
+      const btns=el('div',{class:'file-btns'});
+      const e=el('button',{class:'btn small'},'Edit');e.onclick=()=>edit(f);btns.appendChild(e);
+      if(f.dirty){const s=el('button',{class:'btn small'},'Stage');s.onclick=()=>add(f);btns.appendChild(s);}
+      row.appendChild(btns);work.appendChild(row);
+    });
+    stage.innerHTML='';
+    const st=files.filter(f=>f.staged);
+    if(!st.length)stage.appendChild(el('p',{class:'empty'},'Nothing staged yet. Edit a file, then stage it.'));
+    st.forEach(f=>{
+      const row=el('div',{class:'file'});
+      row.appendChild(el('span',{class:'fname'},f.name));
+      const u=el('button',{class:'btn small'},'Unstage');u.onclick=()=>unstage(f);row.appendChild(u);
+      stage.appendChild(row);
+    });
+    msg.placeholder=suggestion()||'Stage something first';
+    commitBtn.disabled=!st.length;
+    hist.innerHTML='';
+    history.slice().reverse().forEach(c=>{
+      const row=el('div',{class:'commit-row'});
+      row.appendChild(el('code',null,c.hash));row.appendChild(el('span',null,c.msg));
+      hist.appendChild(row);
+    });
+  }
+  function edit(f){
+    f.dirty=true;
+    T.line('# you change '+f.name+' in your editor','note');
+    if(f.staged)T.line('# the earlier staged version is still staged; stage again to include this edit','note');
+    render();
+  }
+  function add(f){f.staged=true;f.dirty=false;T.line('git add '+f.name,'cmd');render();}
+  function unstage(f){f.staged=false;f.dirty=true;T.line('git restore --staged '+f.name,'cmd');render();}
+  function commit(){
+    const st=files.filter(f=>f.staged);if(!st.length)return;
+    const m=msg.value.trim()||suggestion();
+    const h=hash();
+    T.line('git commit -m "'+m+'"','cmd');
+    T.line('[main '+h+'] '+m,'ok');
+    T.line(' '+st.length+' file'+(st.length>1?'s':'')+' changed','out');
+    history.push({hash:h,msg:m});
+    st.forEach(f=>f.staged=false);
+    msg.value='';render();
+  }
+  function status(){
+    T.line('git status','cmd');T.line('On branch main','out');
+    const st=files.filter(f=>f.staged),dt=files.filter(f=>f.dirty);
+    if(!st.length&&!dt.length){T.line('nothing to commit, working tree clean','ok');return;}
+    if(st.length){T.line('Changes to be committed:','out');st.forEach(f=>T.line('        modified:   '+f.name,'ok'));}
+    if(dt.length){T.line('Changes not staged for commit:','out');dt.forEach(f=>T.line('        modified:   '+f.name,'err'));}
+  }
+  commitBtn.onclick=commit;
+  msg.addEventListener('keydown',e=>{if(e.key==='Enter')commit();});
+  document.getElementById('aStatus').onclick=status;
+  document.getElementById('aReset').onclick=init;
+  init();
+})();
+
+/* ---------- Lab B: branches and merges ---------- */
+(function(){
+  const svg=document.getElementById('bSvg'),wrap=document.getElementById('bWrap'),key=document.getElementById('bKey');
+  const swSel=document.getElementById('bSwitch'),mSel=document.getElementById('bMergeSel'),mBtn=document.getElementById('bMerge'),brBtn=document.getElementById('bBranch');
+  const T=Term(document.getElementById('bTerm'));
+  const COLORS=['var(--l0)','var(--l1)','var(--l2)','var(--l3)'];
+  const NAMES=['feature-probe','fix-typo','experiment'];
+  const MSGS=['Add spindle check','Fix rounding bug','Tidy comments','Add tool table','Update README','Rename variables','Adjust feed limits','Add safe retract'];
+  let S,msgI;
+
+  function mk(br,m,parents){
+    const id=hash();
+    S.commits.push({id,parents:parents||(S.branches[br]?[S.branches[br]]:[]),lane:S.lane[br],msg:m,idx:S.commits.length});
+    S.branches[br]=id;return id;
+  }
+  function byId(id){return S.commits.find(c=>c.id===id);}
+  function ancestors(id){const set=new Set(),st=[id];while(st.length){const x=st.pop();if(set.has(x))continue;set.add(x);byId(x).parents.forEach(p=>st.push(p));}return set;}
+  function nextMsg(){return MSGS[(msgI++)%MSGS.length];}
+
+  function init(){
+    S={commits:[],branches:{main:null},lane:{main:0},parent:{},head:'main'};msgI=0;
+    mk('main','Initial commit');mk('main','Add README');
+    T.clear();T.line('# You are on main. Commit, or make a branch.','note');
+    render();
+  }
+  function commit(){
+    const m=nextMsg();T.line('git commit -m "'+m+'"','cmd');
+    const id=mk(S.head,m);T.line('['+S.head+' '+id+'] '+m,'ok');render();
+  }
+  function branch(){
+    const name=NAMES.find(n=>!(n in S.branches));if(!name)return;
+    S.branches[name]=S.branches[S.head];S.lane[name]=Object.keys(S.lane).length;S.parent[name]=S.head;S.head=name;
+    T.line('git switch -c '+name,'cmd');T.line("Switched to a new branch '"+name+"'",'out');
+    T.line('# a new label on the same commit; commit to see the line split off','note');
+    render();
+  }
+  function sw(name){
+    if(name===S.head)return;S.head=name;
+    T.line('git switch '+name,'cmd');T.line("Switched to branch '"+name+"'",'out');render();
+  }
+  function merge(){
+    const other=mSel.value;if(!other)return;
+    const cur=S.branches[S.head],tgt=S.branches[other];
+    T.line('git merge '+other,'cmd');
+    if(ancestors(cur).has(tgt)){T.line('Already up to date.','out');T.line('# '+S.head+' already contains everything on '+other,'note');}
+    else if(ancestors(tgt).has(cur)){
+      S.branches[S.head]=tgt;T.line('Fast-forward','ok');
+      T.line('# '+S.head+' had no new commits of its own, so Git just moved the label forward','note');
+    } else {
+      const id=mk(S.head,'Merge '+other+' into '+S.head,[cur,tgt]);
+      T.line("Merge made by the 'ort' strategy.",'ok');
+      T.line('# new merge commit '+id+' has two parents: one from each line','note');
+    }
+    render();
+  }
+
+  function render(){
+    const X=64,ROW=66,PL=70,PT=58,R=9;
+    const lanes=Object.keys(S.lane).length;
+    const W=PL+(S.commits.length-1)*X+90,H=PT+(lanes-1)*ROW+34;
+    // Rows follow the branch family tree: each branch sits directly under the branch it came from,
+    // ahead of any later siblings. Colours stay tied to the branch, rows are only placement.
+    const kids={};Object.keys(S.lane).forEach(b=>{if(b!=='main')(kids[S.parent[b]]=kids[S.parent[b]]||[]).push(b);});
+    const row={};let r=0;(function walk(b){row[S.lane[b]]=r++;(kids[b]||[]).forEach(walk);})('main');
+    const px=c=>PL+c.idx*X,py=c=>PT+row[c.lane]*ROW;
+    let out='';
+    S.commits.forEach(c=>{
+      c.parents.forEach((pid,i)=>{
+        const p=byId(pid),x1=px(p),y1=py(p),x2=px(c),y2=py(c);
+        let d,col;
+        if(y1===y2){d=`M${x1} ${y1}L${x2} ${y2}`;}
+        else if(i===0){d=`M${x1} ${y1}C${x1+34} ${y1},${x1+10} ${y2},${x1+42} ${y2}L${x2} ${y2}`;}
+        else{d=`M${x1} ${y1}L${x2-44} ${y1}C${x2-12} ${y1},${x2-32} ${y2},${x2} ${y2}`;}
+        col=i===0?COLORS[c.lane]:COLORS[p.lane];
+        out+=`<path d="${d}" style="fill:none;stroke:${col};stroke-width:3.5;stroke-linecap:round"/>`;
+      });
+    });
+    S.commits.forEach(c=>{
+      const merge=c.parents.length>1,col=COLORS[c.lane];
+      out+=`<circle cx="${px(c)}" cy="${py(c)}" r="${R}" style="fill:${merge?'var(--surface)':col};stroke:${merge?col:'var(--bg)'};stroke-width:${merge?3.5:3}"><title>${c.id}: ${c.msg}</title></circle>`;
+    });
+    const at={};Object.keys(S.branches).forEach(b=>{(at[S.branches[b]]=at[S.branches[b]]||[]).push(b);});
+    Object.keys(at).forEach(id=>{
+      const c=byId(id),names=at[id].sort((a,b)=>(b===S.head)-(a===S.head));
+      names.forEach((n,k)=>{
+        const w=n.length*7.4+18,x=px(c)-w/2,y=py(c)-R-26-k*24,col=COLORS[S.lane[n]],head=n===S.head;
+        out+=`<rect x="${x}" y="${y}" width="${w}" height="20" rx="10" style="fill:${head?(col==='var(--l1)'?'var(--l1-strong)':col):'var(--surface)'};stroke:${col};stroke-width:1.5"/>`;
+        out+=`<text x="${px(c)}" y="${y+14}" text-anchor="middle" style="font:500 12px var(--mono);fill:${head?'var(--on-accent)':'var(--ink)'}">${n}</text>`;
+      });
+    });
+    svg.setAttribute('width',W);svg.setAttribute('height',H);svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+    svg.setAttribute('aria-label',`Commit graph with ${S.commits.length} commits and branches ${Object.keys(S.branches).join(', ')}. Current branch: ${S.head}.`);
+    svg.innerHTML=out;
+    wrap.scrollLeft=wrap.scrollWidth;
+
+    swSel.innerHTML='';Object.keys(S.branches).forEach(b=>{const o=el('option',{value:b},b);if(b===S.head)o.selected=true;swSel.appendChild(o);});
+    mSel.innerHTML='';const others=Object.keys(S.branches).filter(b=>b!==S.head);
+    others.forEach(b=>mSel.appendChild(el('option',{value:b},b)));
+    mSel.disabled=mBtn.disabled=!others.length;
+    brBtn.disabled=!NAMES.some(n=>!(n in S.branches));
+    key.innerHTML='';
+    key.append('You\u2019re on ');key.appendChild(el('strong',null,S.head));
+    key.append('. The filled label is the current branch (HEAD); your next commit lands there. Hollow dots are merge commits.');
+  }
+  document.getElementById('bCommit').onclick=commit;
+  brBtn.onclick=branch;
+  swSel.onchange=()=>sw(swSel.value);
+  mBtn.onclick=merge;
+  document.getElementById('bReset').onclick=init;
+  init();
+})();
+
+/* ---------- Lab C: you, GitHub, Ben ---------- */
+(function(){
+  const T=Term(document.getElementById('cTerm'));
+  const box={you:document.getElementById('cYou'),origin:document.getElementById('cOrigin'),ben:document.getElementById('cBen')};
+  const stat={you:document.getElementById('cYouS'),ben:document.getElementById('cBenS')};
+  const LABEL={you:'you',ben:'ben'};
+  let S,n,m;
+
+  function init(){
+    n=0;m=0;
+    const base=[{id:'A',by:'base'},{id:'B',by:'base'}];n=2;
+    S={you:base.slice(),origin:base.slice(),ben:base.slice()};
+    T.clear();T.line('# Everyone starts with the same two commits.','note');
+    render();
+  }
+  function nextId(){const L='ABCDEFGHIJKLNOPQRSTUVWXYZ';return n<L.length?L[n++]:String(n++);}
+  function ids(a){return a.map(c=>c.id);}
+  function isPrefix(a,b){return a.length<=b.length&&a.every((c,i)=>c.id===b[i].id);}
+
+  function commit(who){
+    const c={id:nextId(),by:who};S[who].push(c);
+    T.line('git commit -m "'+(who==='you'?'Your change':'Ben\u2019s change')+'"','cmd',LABEL[who]);
+    T.line('# commit '+c.id+' saved on '+(who==='you'?'your':'Ben\u2019s')+' laptop only','note');
+    render();
+  }
+  function push(who){
+    T.line('git push','cmd',LABEL[who]);
+    const L=S[who],O=S.origin;
+    if(ids(L).join()===ids(O).join()){T.line('Everything up-to-date','out');}
+    else if(isPrefix(O,L)){
+      const k=L.length-O.length;S.origin=L.slice();
+      T.line('To github.com:your-team/project.git','out');
+      T.line('   main -> main  ('+k+' commit'+(k>1?'s':'')+' sent)','ok');
+    } else {
+      T.line(' ! [rejected]        main -> main (fetch first)','err');
+      T.line('error: failed to push some refs','err');
+      T.line('# GitHub has commits you don\u2019t have yet. Pull first, then push again.','note');
+    }
+    render();
+  }
+  function pull(who){
+    T.line('git pull','cmd',LABEL[who]);
+    const L=S[who],O=S.origin;
+    if(isPrefix(O,L)){
+      T.line('Already up to date.','out');
+      if(L.length>O.length)T.line('# you have commits GitHub doesn\u2019t; push to share them','note');
+    } else if(isPrefix(L,O)){
+      const k=O.length-L.length;S[who]=O.slice();
+      T.line('Fast-forward','ok');T.line('# got '+k+' new commit'+(k>1?'s':'')+' from GitHub','note');
+    } else {
+      const oset=new Set(ids(O));const mine=L.filter(c=>!oset.has(c.id));
+      const mc={id:'M'+(++m),by:'merge'};
+      S[who]=O.concat(mine,[mc]);
+      T.line("Merge made by the 'ort' strategy.",'ok');
+      T.line('# your work and the new commits from GitHub are combined in merge commit '+mc.id+'. Push to share it.','note');
+    }
+    render();
+  }
+  function describe(who){
+    const L=new Set(ids(S[who])),O=new Set(ids(S.origin));
+    const ahead=[...L].filter(x=>!O.has(x)).length,behind=[...O].filter(x=>!L.has(x)).length;
+    const p=k=>k+' commit'+(k>1?'s':'');
+    if(!ahead&&!behind)return'In sync with GitHub.';
+    if(ahead&&!behind)return p(ahead)+' ready to push.';
+    if(!ahead&&behind)return'GitHub has '+p(behind)+' you don\u2019t. Pull to get them.';
+    return'Split from GitHub: '+p(ahead)+' to push, '+p(behind)+' to pull. Pull first.';
+  }
+  function chips(target,list){
+    target.innerHTML='';
+    list.forEach(c=>{const s=el('span',{class:'chip '+c.by,title:c.by==='base'?'Starting commit':c.by==='merge'?'Merge commit':(c.by==='you'?'Your commit':'Ben\u2019s commit')},c.id);target.appendChild(s);});
+  }
+  function render(){
+    chips(box.you,S.you);chips(box.origin,S.origin);chips(box.ben,S.ben);
+    stat.you.textContent=describe('you');stat.ben.textContent=describe('ben');
+  }
+  document.querySelectorAll('#labC [data-act]').forEach(b=>{
+    b.onclick=()=>{const w=b.dataset.who,a=b.dataset.act;if(a==='commit')commit(w);else if(a==='push')push(w);else pull(w);};
+  });
+  document.getElementById('cReset').onclick=init;
+  init();
+})();
+</script>
+</body>
+</html>

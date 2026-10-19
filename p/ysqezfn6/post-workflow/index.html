@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="bingbot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="referrer" content="no-referrer">
+<title>Kennewell Post Workflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Same visual system as "How Git works": the page is drawn as a commit history, one station per chapter.
+   Blue is main, brand red is a working branch, green/red are NC lines added/removed.
+   Livetools palette and type, matching the proposal and handover pages. Light only, like them. */
+:root{
+  --bg:#F8F8F8; --surface:#FFFFFF; --surface-2:#EEEEEE; --ink:#2A2A2A; --muted:#565554; --rule:#DEDEDE;
+  --term-bg:#2A2A2A; --term-ink:#EEEEEE; --term-dim:#A8A8A8; --term-ok:#9AD8A2; --term-err:#FFABA1; --term-warn:#F8C37D;
+  --l0:#1F1BAB; --l1:#ED1C24; --l2:#0B8535; --l3:#852758; --on-accent:#FFFFFF;
+  --amber:#F5A300; --edge:#868686;
+  --good:#00722A; --bad:#D00F1B;
+  --link:#17058F; --link-hover:#180098;
+  --focus:#1F1BAB;
+  --sans:"Inter", Arial, Helvetica, sans-serif;
+  --cond:"Inter", Arial, Helvetica, sans-serif;
+  --mono:"JetBrains Mono", "Cascadia Mono", Consolas, "Courier New", monospace;
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-feature-settings:"ss02" 1;font-size:17px;line-height:1.62}
+img,svg{max-width:100%}
+a{color:var(--link)}
+a:hover{color:var(--link-hover)}
+code{font-family:var(--mono);font-feature-settings:"zero" 1;font-size:.88em}
+p code,li code,dd code,td code{background:var(--surface-2);padding:1px 5px;border-radius:4px}
+strong{font-weight:600}
+
+.page{max-width:1040px;margin:0 auto;padding-block:64px 96px;
+  padding-left:max(96px, env(safe-area-inset-left,0px));padding-right:max(24px, env(safe-area-inset-right,0px));position:relative}
+.page::before{content:"";position:absolute;left:44px;top:72px;bottom:120px;width:4px;border-radius:2px;background:var(--l0)}
+.station{position:absolute;left:-66px;top:6px;width:32px;height:32px;border-radius:50%;
+  background:var(--surface);border:4px solid var(--l0);display:grid;place-items:center;
+  font:500 13px/1 var(--mono);color:var(--ink)}
+.station.start{background:var(--l0);width:36px;height:36px;left:-68px;top:10px}
+.station.end{top:2px}
+
+.hero{position:relative;max-width:46rem}
+.eyebrow{font:500 .8rem/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+h1{font-family:var(--cond);font-weight:900;font-size:clamp(2.3rem,5.6vw,3.6rem);line-height:1.05;letter-spacing:-.02em;margin:0 0 24px;text-wrap:balance}
+.lede{font-size:1.2rem;line-height:1.55;margin:0 0 16px;max-width:40rem}
+.muted{color:var(--muted)}
+
+.route{margin:32px 0 0;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:16px 0 8px;overflow-x:auto;max-width:52rem}
+.route svg{display:block;width:calc(100% - 32px);max-width:780px;min-width:600px;height:auto;margin:0 16px}
+.route-cap{font-size:.88rem;color:var(--muted);margin:4px 18px 8px}
+
+section.chapter{position:relative;margin-top:96px}
+h2{font-family:var(--cond);font-weight:700;font-size:clamp(1.6rem,3.4vw,2rem);line-height:1.2;margin:0 0 18px;letter-spacing:-.015em;text-wrap:balance}
+h3{font-size:1.02rem;font-weight:600;margin:0 0 4px}
+.prose{max-width:40rem}
+.prose p{margin:0 0 16px}
+.hint{max-width:40rem;margin:20px 0 0;padding:12px 16px;border-left:4px solid var(--edge);background:var(--surface);border-radius:0 8px 8px 0}
+.hint p{margin:0}
+.warn{border-left-color:var(--bad)}
+.label{font:600 .75rem/1 var(--sans);letter-spacing:.07em;text-transform:uppercase;margin-right:6px}
+
+.terms{margin:0 0 18px;max-width:40rem}
+.terms div{padding:10px 0;border-top:1px solid var(--rule)}
+.terms div:last-child{border-bottom:1px solid var(--rule)}
+.terms dt{font-weight:600;display:inline}
+.terms dd{display:inline;margin:0}
+.terms dt::after{content:": "}
+.res{font-family:var(--mono);font-size:.85rem;font-weight:500;padding:1px 7px;border-radius:4px}
+.res.clean{background:color-mix(in srgb,var(--good) 18%,transparent)}
+.res.diff{background:color-mix(in srgb,var(--amber) 30%,transparent)}
+.res.fail{background:color-mix(in srgb,var(--bad) 18%,transparent)}
+
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:8px 0 0;max-width:52rem}
+.duo > div{background:var(--surface);border:1px solid var(--rule);border-left:5px solid var(--l0);border-radius:6px 10px 10px 6px;padding:16px 18px;min-width:0}
+.duo > div + div{border-left-color:var(--muted)}
+.duo ul{margin:8px 0 0;padding-left:18px}
+.duo li{margin-bottom:8px;font-size:.95rem}
+.duo li:last-child{margin-bottom:0}
+
+/* Workflow drawn as a branch */
+.flow{list-style:none;counter-reset:s;margin:24px 0 0;padding:0 0 0 36px;position:relative;max-width:44rem}
+.flow::before{content:"";position:absolute;left:11px;top:14px;bottom:14px;width:4px;border-radius:2px;background:var(--l1)}
+.flow li{position:relative;padding:0 0 28px;counter-increment:s;min-width:0}
+.flow li::before{content:counter(s);position:absolute;left:-36px;top:0;width:26px;height:26px;border-radius:50%;
+  background:var(--surface);border:3px solid var(--l1);display:grid;place-items:center;font:500 12px/1 var(--mono)}
+.flow li.onmain::before{border-color:var(--l0);background:var(--l0);color:var(--on-accent)}
+.flow h3{font-size:1.05rem;margin:0 0 4px;padding-top:1px}
+.flow p{margin:0 0 8px}
+.ask{font-size:.94rem;color:var(--muted);margin:8px 0 0}
+.ask q{color:var(--ink);font-style:italic}
+.ask q::before{content:"\201C"}.ask q::after{content:"\201D"}
+
+/* What to say to Claude, with the Git it runs underneath in small print */
+.prompt{max-width:44rem;margin:10px 0 0;background:var(--surface);border:1px solid var(--rule);border-left:4px solid var(--l0);border-radius:4px 10px 10px 4px;padding:10px 14px}
+.prompt .k{font:500 .72rem/1 var(--sans);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+.prompt p{margin:0}
+.under{font-size:.85rem;color:var(--muted);margin:6px 0 0;max-width:44rem;line-height:1.9}
+.under code{background:var(--surface-2);padding:1px 5px;border-radius:4px;margin-right:4px;word-break:break-word}
+pre.code{background:var(--term-bg);color:var(--term-ink);font:14px/1.6 var(--mono);padding:12px 14px;border-radius:8px;overflow-x:auto;margin:8px 0 0;max-width:44rem}
+pre.code .c{color:var(--term-dim)}
+pre.msg{white-space:pre-wrap;word-break:break-word}
+
+.checks{max-width:40rem;padding-left:22px;margin:0 0 16px}
+.checks li{margin-bottom:10px}
+
+/* Review playground */
+.lab{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:18px;margin:28px 0 0;max-width:52rem}
+.lab-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.lab-title{font-weight:600}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.btn{font:500 .9rem/1.2 var(--sans);color:var(--ink);background:var(--surface-2);border:1px solid var(--rule);
+  border-radius:8px;padding:8px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn:hover:not(:disabled){border-color:var(--muted)}
+.btn.small{padding:4px 10px;font-size:.84rem;font-family:var(--mono)}
+.btn[aria-pressed="true"]{background:var(--l0);border-color:var(--l0);color:var(--on-accent)}
+.btn.tab-done{border-color:var(--good)}
+.btn.approve{border-color:var(--good)}
+.btn.reject{border-color:var(--bad)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.brief{background:var(--bg);border-radius:10px;padding:12px 14px;margin:0 0 12px}
+.brief .k{font:500 .75rem/1 var(--sans);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+.brief p{margin:0}
+.term{background:var(--term-bg);color:var(--term-ink);font:13px/1.55 var(--mono);border-radius:10px;padding:12px 14px;
+  overflow-x:auto;margin:0 0 12px;white-space:pre}
+.term .dim{color:var(--term-dim)}
+.term .ok{color:var(--term-ok)}
+.term .err{color:var(--term-err)}
+.term .wn{color:var(--term-warn)}
+.term-k{font:500 .75rem/1 var(--sans);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.verdict{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.verdict span{font-size:.92rem;color:var(--muted)}
+.feedback{margin:14px 0 0;padding:12px 16px;border-radius:0 8px 8px 0;border-left:4px solid var(--rule);background:var(--bg)}
+.feedback.right{border-left-color:var(--good)}
+.feedback.wrong{border-left-color:var(--bad)}
+.feedback p{margin:0 0 8px}
+.feedback p:last-child{margin:0}
+.feedback .head{font-weight:600}
+.example-note{font-size:.85rem;color:var(--muted);margin:12px 0 0}
+
+.table-wrap{overflow-x:auto;max-width:56rem;margin-top:8px}
+table{border-collapse:collapse;width:100%;font-size:.94rem}
+th,td{text-align:left;padding:10px 14px 10px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;font-size:.85rem;color:var(--muted)}
+td:first-child{font-weight:500;min-width:9rem}
+td:nth-child(2){font-style:italic;min-width:14rem}
+td code{display:inline-block;margin:0 0 4px;white-space:nowrap}
+
+.closing{margin-top:48px;max-width:40rem;font-size:1.1rem}
+
+@media (max-width:640px){
+  body{font-size:16px}
+  .page{padding-block:40px 72px;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+  .page::before{display:none}
+  .station{position:static;display:inline-grid;margin:0 0 12px;width:30px;height:30px}
+  .station.start{display:none}
+  .duo{grid-template-columns:1fr}
+  section.chapter{margin-top:72px}
+  .lab{padding:14px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .btn{transition:border-color .15s,background-color .15s}
+}
+</style>
+</head>
+<body>
+
+<main class="page">
+
+<header class="hero">
+  <span class="station start" aria-hidden="true"></span>
+  <p class="eyebrow">Kennewell CNC · kennewell-cnc-posts</p>
+  <h1>Changing the posts as a team</h1>
+  <p class="lede">The Okuma post in this repo writes the programs that run Kennewell's machines. One person changing it is easy. Two people changing it at once is how a post ends up with half of one fix and none of the other, and nobody can say which version wrote a given program. Git sorts that out, and this page shows how we use it here.</p>
+  <p class="muted">It follows on from <a href="/resources/how-git-works/" target="_blank" rel="noopener">How Git works</a>. If commits, branches and pull requests are new to you, read that first. This page puts the same ideas to work on the posts.</p>
+
+  <figure class="route" aria-labelledby="routeCap">
+    <svg width="780" height="200" viewBox="0 0 780 200" role="img" aria-label="Diagram: a change leaves main on a branch, passes through edit, regression diff, commit, review and machine prove-out, then merges back into main and is tagged as a release.">
+      <path d="M20 52 L760 52" style="fill:none;stroke:var(--l0);stroke-width:4;stroke-linecap:round"/>
+      <path d="M80 52 C120 52,96 132,140 132 L600 132 C644 132,620 52,664 52" style="fill:none;stroke:var(--l1);stroke-width:4;stroke-linecap:round"/>
+      <circle cx="40" cy="52" r="9" style="fill:var(--l0);stroke:var(--surface);stroke-width:3"/>
+      <circle cx="80" cy="52" r="9" style="fill:var(--l0);stroke:var(--surface);stroke-width:3"/>
+      <circle cx="180" cy="132" r="9" style="fill:var(--l1);stroke:var(--surface);stroke-width:3"/>
+      <circle cx="270" cy="132" r="9" style="fill:var(--l1);stroke:var(--surface);stroke-width:3"/>
+      <circle cx="360" cy="132" r="9" style="fill:var(--l1);stroke:var(--surface);stroke-width:3"/>
+      <circle cx="450" cy="132" r="9" style="fill:var(--l1);stroke:var(--surface);stroke-width:3"/>
+      <circle cx="540" cy="132" r="9" style="fill:var(--l1);stroke:var(--surface);stroke-width:3"/>
+      <circle cx="664" cy="52" r="10" style="fill:var(--surface);stroke:var(--l0);stroke-width:4"/>
+      <rect x="18" y="14" width="56" height="22" rx="11" style="fill:var(--l0)"/>
+      <text x="46" y="29" text-anchor="middle" style="font:500 12px var(--mono);fill:var(--on-accent)">main</text>
+      <rect x="596" y="14" width="164" height="22" rx="4" style="fill:var(--surface);stroke:var(--l0);stroke-width:1.5"/>
+      <text x="678" y="29" text-anchor="middle" style="font:500 12px var(--mono);fill:var(--ink)">tag okuma-2026-10-16</text>
+      <text x="180" y="162" text-anchor="middle" style="font:500 13px var(--sans);fill:var(--ink)">Edit</text>
+      <text x="270" y="162" text-anchor="middle" style="font:500 13px var(--sans);fill:var(--ink)">Regression</text>
+      <text x="270" y="178" text-anchor="middle" style="font:500 13px var(--sans);fill:var(--ink)">diff</text>
+      <text x="360" y="162" text-anchor="middle" style="font:500 13px var(--sans);fill:var(--ink)">Commit</text>
+      <text x="450" y="162" text-anchor="middle" style="font:500 13px var(--sans);fill:var(--ink)">Pull request</text>
+      <text x="450" y="178" text-anchor="middle" style="font:500 13px var(--sans);fill:var(--ink)">and review</text>
+      <text x="540" y="162" text-anchor="middle" style="font:500 13px var(--sans);fill:var(--ink)">Prove-out</text>
+      <text x="540" y="178" text-anchor="middle" style="font:500 13px var(--sans);fill:var(--ink)">on the machine</text>
+      <text x="664" y="86" text-anchor="middle" style="font:500 13px var(--sans);fill:var(--ink)">Merge</text>
+      <text x="96" y="96" style="font:400 12px var(--mono);fill:var(--muted)">okuma-g97-after-work-offset</text>
+    </svg>
+    <figcaption class="route-cap" id="routeCap">The route every change takes. The red branch is where the work happens; nothing joins the blue line until it's been proven.</figcaption>
+  </figure>
+</header>
+
+<section class="chapter" aria-labelledby="c1">
+  <span class="station" aria-hidden="true">1</span>
+  <h2 id="c1">What's in the repo, and what stays on your PC</h2>
+  <div class="prose">
+    <p>The shared copy lives on GitHub at <code>Kennewell-CNC/kennewell-cnc-posts</code>. Everyone who works on the posts clones it to their own PC and works there. Nearly every change you'll make is to one file, the Okuma post.</p>
+  </div>
+  <div class="duo">
+    <div>
+      <h3>In the repo, shared with everyone</h3>
+      <ul>
+        <li><code>okuma-kennewell-cnc.cps</code>, the post itself.</li>
+        <li><code>machines/</code>, the Fusion machine definitions for the GENOS M560V-5AX, the M560 4ax (cyclic and limited), the M460 and the MB-56VII. The post errors without one, so every test post uses one of these.</li>
+        <li><code>okuma-osp-p500-manual/</code>, the Okuma programming manual split into sections, so a G-code can be looked up rather than guessed.</li>
+        <li><code>.claude/skills/</code> and <code>CLAUDE.md</code>, the post-processor know-how Claude works from and the rules it follows in this repo.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Kept off GitHub on purpose</h3>
+      <ul>
+        <li>Autodesk's Post Processor Guide, the training guide and the Autodesk library posts. They're Autodesk copyright. You can keep your own copies, but they never get committed.</li>
+        <li>Your own working files: local copies or trial versions of a post, reference documents and project folders. The <code>.gitignore</code> file lists the ones we've agreed to keep local, such as the <code>KENNEWELL</code> folder and the Okuma Word documents.</li>
+        <li>Anything else Git lists as untracked that you don't recognise. Ask before adding it.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="prose" style="margin-top:18px">
+    <p>Git skips anything named in <code>.gitignore</code>, so a careless <code>git add</code> won't send copyright material up to GitHub.</p>
+  </div>
+</section>
+
+<section class="chapter" aria-labelledby="c2">
+  <span class="station" aria-hidden="true">2</span>
+  <h2 id="c2">main is the production post</h2>
+  <div class="prose">
+    <p>Rule number one: <code>main</code> is the production release of every post in this repo. The versions on <code>main</code> are the ones uploaded to the Fusion Hub, so they're what everyone posts with and what ends up on the machines. That's why nothing lands on <code>main</code> until it's been posted, compared against the previous version, checked by a second person and, if it changes how the machine moves, run on the machine.</p>
+    <p>Up to now one person has made every change, committing straight to <code>main</code>. That's fine when you're working alone. As soon as a second person is changing the post, every change goes on its own branch and arrives on <code>main</code> through a pull request, where someone else checks it before it's merged.</p>
+  </div>
+  <div class="hint"><p><span class="label">Tip</span>Whoever administers the Kennewell-CNC organisation on GitHub can add a rule to <code>main</code> that refuses direct pushes and requires an approved pull request. Then nobody has to remember the rule, because GitHub won't let them break it.</p></div>
+</section>
+
+<section class="chapter" aria-labelledby="c3">
+  <span class="station" aria-hidden="true">3</span>
+  <h2 id="c3">Setting up a new PC</h2>
+  <div class="prose"><p>Do this once per person, per PC.</p></div>
+  <ol class="checks">
+    <li><strong>A GitHub account, added to the Kennewell-CNC organisation.</strong> Ask the organisation's admin to invite you.</li>
+    <li><strong>Install the software.</strong>
+      <dl class="terms" style="margin-top:8px">
+        <div><dt><a href="https://git-scm.com/download/win" target="_blank" rel="noopener">Git for Windows</a></dt><dd>Git itself. It also installs Git Credential Manager, which handles signing in to GitHub (step 4).</dd></div>
+        <div><dt><a href="https://code.visualstudio.com/" target="_blank" rel="noopener">VS Code</a></dt><dd>the editor you open the repo folder in, to read and edit the post.</dd></div>
+        <div><dt><a href="https://claude.com/claude-code" target="_blank" rel="noopener">Claude Code</a></dt><dd>does most of the Git work on this page for you, once you're signed in to GitHub.</dd></div>
+        <div><dt><a href="https://cli.github.com/" target="_blank" rel="noopener">GitHub CLI</a> (optional)</dt><dd>lets Claude open pull requests for you as well. Sign it in once with <code>gh auth login</code>. Without it, Claude pushes your branch and you open the pull request on the GitHub website.</dd></div>
+        <div><dt>Fusion</dt><dd>the regression diff uses the post engine that installs with it.</dd></div>
+        <div><dt><a href="https://nodejs.org/" target="_blank" rel="noopener">Node.js</a></dt><dd>runs the regression diff.</dd></div>
+      </dl>
+    </li>
+    <li><strong>Add the VS Code extensions.</strong> Open the Extensions panel in VS Code and search for each one by name.
+      <dl class="terms" style="margin-top:8px">
+        <div><dt>Autodesk Fusion post processor extension</dt><dd>edit and test-post <code>.cps</code> files from inside VS Code.</dd></div>
+        <div><dt>GitLens</dt><dd>shows who changed each line of the post, when and in which commit, right in the editor.</dd></div>
+        <div><dt>ESLint</dt><dd>flags JavaScript mistakes in the post as you type, before you ever post with it.</dd></div>
+        <div><dt>NC-Gcode</dt><dd>colours the NC output so programs are easier to read and compare.</dd></div>
+      </dl>
+    </li>
+    <li><strong>Clone the repo, and sign in to GitHub.</strong> Open Claude Code in <code>C:\source</code>:
+<div class="prompt"><span class="k">Ask Claude</span><p>Clone Kennewell-CNC/kennewell-cnc-posts from GitHub into this folder.</p></div>
+<p class="under">What Claude runs: <code>git clone https://github.com/Kennewell-CNC/kennewell-cnc-posts.git</code></p>
+<p>Because it's the first time Git has talked to GitHub, Git Credential Manager opens your browser to sign in, then saves the sign-in in Windows Credential Manager. You only do this once. If it ever stops working (a changed password, say), remove the <code>github.com</code> entry from Windows Credential Manager and Git asks you to sign in again.</p>
+<p class="ask">You can also clone over SSH (<code>git@github.com:Kennewell-CNC/kennewell-cnc-posts.git</code>), which signs in with a key on your PC instead. Either works with the same repo.</p></li>
+    <li><strong>Hand the rest to Claude.</strong> Open Claude Code in the new <code>kennewell-cnc-posts</code> folder and ask it to finish the setup:
+<div class="prompt"><span class="k">Ask Claude</span><p>Set my Git name to Jo Bloggs and my email to the one on my GitHub account, then check the regression diff can find Fusion's post engine.</p></div>
+<p class="under">What Claude runs: <code>git config --global user.name "Jo Bloggs"</code> <code>git config --global user.email …</code> <code>node .claude/skills/post-regression-diff/scripts/post-diff.js doctor</code></p></li>
+  </ol>
+  <div class="hint"><p><span class="label">The key thing</span>Once you're signed in to GitHub, Claude Code can do nearly all the Git work on this page. You tell it what you want in plain English, and it pulls, branches, commits, pushes and runs the regression diff for you. The machining judgement stays with you. You decide what the change should do and whether the NC is right, and you do the prove-out on the machine yourself.</p></div>
+</section>
+
+<section class="chapter" aria-labelledby="c4">
+  <span class="station" aria-hidden="true">4</span>
+  <h2 id="c4">The life of a post change</h2>
+  <div class="prose">
+    <p>Every change follows the same nine steps. Each one has an example of what to ask Claude Code. Underneath, in small print, are the Git commands Claude runs in the background, so you can follow what it's doing and recognise them when it reports back.</p>
+  </div>
+  <ol class="flow">
+    <li class="onmain"><h3>Start from the latest main</h3><p>Otherwise you're building on whatever was there the last time you pulled, which could be last week's post.</p>
+<div class="prompt"><span class="k">Ask Claude</span><p>Switch to main and pull the latest from GitHub.</p></div>
+<p class="under">What Claude runs: <code>git switch main</code> <code>git pull</code></p></li>
+    <li><h3>Make a branch named after the job</h3><p>Keep it to one change per branch, like one G-code fix or one new property. If it turns out to be wrong, it can be backed out without taking anything else with it.</p>
+<div class="prompt"><span class="k">Ask Claude</span><p>Start a branch for adding G97 after every work offset.</p></div>
+<p class="under">What Claude runs: <code>git switch -c okuma-g97-after-work-offset</code></p></li>
+    <li><h3>Make the change</h3><p>Describe it the way you'd explain it to another machinist: which machine, which code, where it goes in the program, and the manual page if you have one. Claude edits the post in its existing style and tells you about anything that changes modal behaviour, because those are the changes that look like one word in the code but alter every program.</p>
+<div class="prompt"><span class="k">Ask Claude</span><p>In the Okuma post, output G97 on its own line after every G15 H work offset. The manual says it's a one-shot code that mustn't share a block with axis motion (P-27, P-57 and P-551). Tell me if anything modal changes.</p></div></li>
+    <li><h3>Prove it with the regression diff</h3><p>Post the same test programs through the old post and your edited one, and compare the NC. Chapter 5 covers this properly.</p>
+<div class="prompt"><span class="k">Ask Claude</span><p>Run the regression diff against main for the M560 4ax cyclic and the GENOS 5-axis, and show me every NC line that changed.</p></div>
+<p class="under">What Claude runs: <code>node .claude/skills/post-regression-diff/scripts/post-diff.js diff --ref main --machine …</code></p></li>
+    <li><h3>Commit, with a message that says what the machine will do differently</h3>
+<div class="prompt"><span class="k">Ask Claude</span><p>Commit the post change. Say what the machine does differently and how we checked it.</p></div>
+<p class="under">What Claude runs: <code>git add okuma-kennewell-cnc.cps</code> <code>git commit</code></p>
+<p style="margin-top:12px">Read the message before it goes in. The first line is a short summary, and the rest says why the change was made and how it was checked. Here's one from the repo's own history, shortened:</p>
+<pre class="code msg">Okuma post: G97 after every work offset
+
+Output G97 (coordinate recalculation function, P-551) in its own block
+after every G15 H__ work offset selection, as recommended by Okuma.
+G97 is one-shot and must not share a block with axis motion (P-27, P-57).
+
+Verified against the previous commit on the GENOS M560V-5AX with each
+tilted plane method, and on the M560 4ax cyclic: every G15 line is
+followed by exactly one G97 and no other line moves.</pre>
+<p class="ask">If Claude says it's about to commit a file you don't recognise, stop it. Only the files the change is in should go in.</p></li>
+    <li><h3>Push the branch and open a pull request</h3><p>The description should say which machines were posted for and include the regression diff summary, so the reviewer starts with the evidence.</p>
+<div class="prompt"><span class="k">Ask Claude</span><p>Push this branch and open a pull request. Put the regression diff summary and the machines we posted for in the description.</p></div>
+<p class="under">What Claude runs: <code>git push -u origin okuma-g97-after-work-offset</code> <code>gh pr create</code> (needs the GitHub CLI)</p></li>
+    <li><h3>Get it reviewed</h3><p>A second person reads the NC changes as well as the code, and approves or asks for changes. Chapter 6 is the reviewer's checklist. If changes are needed, make them on the same branch and push again. The pull request updates itself.</p>
+<div class="prompt"><span class="k">Ask Claude</span><p>The reviewer wants the G97 left out of the OYZ routine. Make that change, re-run the regression diff, then commit and push.</p></div>
+<p class="under">What Claude runs: <code>post-diff.js diff …</code> <code>git add okuma-kennewell-cnc.cps</code> <code>git commit</code> <code>git push</code></p></li>
+    <li><h3>Prove it on the machine</h3><p>This step is yours. If the change alters motion, work offsets, tool change, retracts, the rotary axis or tilted planes, run a program posted from the branch with your usual first-run caution: single block, rapid and feed overrides down, hand near feed hold. A change to comments or the program header doesn't need this. Note in the pull request what you ran and on which machine.</p></li>
+    <li class="onmain"><h3>Merge, upload to the Fusion Hub, and tag</h3><p>Merge the pull request on GitHub. Upload the post from <code>main</code> to the Fusion Hub, never from a branch, so nobody ends up posting with unreviewed work. Then tag the release (chapter 8) and tidy up.</p>
+<div class="prompt"><span class="k">Ask Claude</span><p>The pull request is merged. Switch back to main, pull, tag it as okuma-2026-10-16, push the tag and delete the finished branch.</p></div>
+<p class="under">What Claude runs: <code>git switch main</code> <code>git pull</code> <code>git tag okuma-2026-10-16</code> <code>git push origin okuma-2026-10-16</code> <code>git branch -d okuma-g97-after-work-offset</code></p></li>
+  </ol>
+</section>
+
+<section class="chapter" aria-labelledby="c5">
+  <span class="station" aria-hidden="true">5</span>
+  <h2 id="c5">Proving a change with the regression diff</h2>
+  <div class="prose">
+    <p>You can read a code change carefully and still not know what it does to the NC. The regression diff shows you. It takes the post as it was before your edit and the post as you've edited it, posts the same set of test programs through both for the machine you pick, and compares the NC files line by line.</p>
+    <p>You get one of three results:</p>
+  </div>
+  <dl class="terms">
+    <div><dt><span class="res clean">CLEAN</span></dt><dd>every NC file came out identical. That's right for a tidy-up that shouldn't change output. If you meant to change something, either the change didn't take effect or the test programs never reached it.</dd></div>
+    <div><dt><span class="res diff">DIFFERENCES</span></dt><dd>some files changed. Open each one and check that only the lines you intended moved.</dd></div>
+    <div><dt><span class="res fail">FAIL</span></dt><dd>a program that posted before now errors. Something is broken. Fix it before going any further.</dd></div>
+  </dl>
+  <div class="prompt"><span class="k">Ask Claude</span><p>Run the regression diff against main for the M560 4ax cyclic and the GENOS 5-axis.</p></div>
+  <p class="under">What Claude runs: <code>node .claude/skills/post-regression-diff/scripts/post-diff.js diff --post okuma-kennewell-cnc.cps --machine "Okuma M560 4ax cyclic" --ref main --category Milling</code>, then the same again for the GENOS.</p>
+  <div class="prose" style="margin-top:20px">
+    <p>The key thing to understand is that a post shares its number formats and modal state across every operation. Edit one corner of the code and you can change every feed, or every rapid, in every program without meaning to. That's what the diff is there to catch, because you'd rarely spot it by reading the code.</p>
+  </div>
+
+  <div class="lab" id="lab">
+    <div class="lab-bar">
+      <span class="lab-title">Playground: approve it or send it back</span>
+      <div class="tabs" role="group" aria-label="Choose an example" id="tabs"></div>
+    </div>
+    <div class="brief"><span class="k">What the pull request says it does</span><p id="intent"></p></div>
+    <p class="term-k">Regression diff summary</p>
+    <div class="term" id="summary" aria-label="Regression diff summary"></div>
+    <p class="term-k">One of the changed NC files</p>
+    <div class="term" id="nc" aria-label="NC file differences"></div>
+    <div class="verdict">
+      <button class="btn approve" id="approve">Approve</button>
+      <button class="btn reject" id="reject">Send it back</button>
+      <span id="progress"></span>
+    </div>
+    <div class="feedback" id="feedback" hidden aria-live="polite"></div>
+    <p class="example-note">These four are made-up examples, built from real output of this post. Green lines were added, red lines removed.</p>
+  </div>
+</section>
+
+<section class="chapter" aria-labelledby="c6">
+  <span class="station" aria-hidden="true">6</span>
+  <h2 id="c6">Reviewing someone else's change</h2>
+  <div class="prose">
+    <p>Approve only when you'd be happy running it on your own job. Work through these on the pull request page:</p>
+  </div>
+  <ol class="checks">
+    <li><strong>Does the description say what the machine will do differently, and on which machines?</strong> If you can't tell from the description, ask before you read the code.</li>
+    <li><strong>Does the regression diff match the description?</strong> Every changed NC line should trace back to it. If the pull request doesn't include the diff, run it yourself (below).</li>
+    <li><strong>Were the right machines posted?</strong> A change to tilted-plane code needs posting on the GENOS M560V-5AX with each tilted-plane method, not only on a 4-axis machine.</li>
+    <li><strong>Is it one change?</strong> Two unrelated changes in one pull request are harder to check and can't be backed out separately. Ask for them to be split.</li>
+    <li><strong>Does it need a machine prove-out, and has it had one?</strong></li>
+  </ol>
+  <div class="prose">
+    <p>Leave comments on the exact lines on GitHub, the same way you'd mark up a drawing. To run the diff on someone's branch yourself:</p>
+  </div>
+  <div class="prompt"><span class="k">Ask Claude</span><p>Check out okuma-g97-after-work-offset and run the regression diff against main for every machine it affects.</p></div>
+  <p class="under">What Claude runs: <code>git fetch</code> <code>git switch okuma-g97-after-work-offset</code> <code>post-diff.js diff --ref main …</code></p>
+  <div class="hint warn"><p><span class="label">Extra care</span>Take extra care with changes to the rotary axis, tilted work plane, work offset, retract and tool change code. Get a comment wrong and you get a wrong comment. Get one of these wrong and the machine goes somewhere you didn't expect, possibly with a tool in the cut.</p></div>
+</section>
+
+<section class="chapter" aria-labelledby="c7">
+  <span class="station" aria-hidden="true">7</span>
+  <h2 id="c7">Two people, one post file</h2>
+  <div class="prose">
+    <p>Because almost everything lives in one file, conflicts are more likely here than on most projects. Git can combine two edits to different parts of the post on its own. It can't combine two edits to the same lines, so it stops and asks you to choose (How Git works, chapter 6, shows what that looks like).</p>
+    <p>These keep conflicts rare and small:</p>
+  </div>
+  <ul class="checks">
+    <li><strong>Say what you're working on.</strong> Open your pull request early as a draft, so the other person can see which part of the post you're in.</li>
+    <li><strong>Keep branches short.</strong> A branch that lives for a day rarely conflicts. One that lives for a month nearly always does.</li>
+    <li><strong>Bring main into your branch before asking for review</strong>, then re-run the regression diff. The other person's change is in <code>main</code> now, and you want to know yours still behaves with it in there.
+<div class="prompt"><span class="k">Ask Claude</span><p>Bring main into my branch and re-run the regression diff. If there's a conflict, show me both versions of the lines and explain the difference before changing anything.</p></div>
+<p class="under">What Claude runs: <code>git switch okuma-g97-after-work-offset</code> <code>git merge main</code> <code>post-diff.js diff --ref main …</code></p></li>
+    <li><strong>Don't reformat code you aren't changing.</strong> Re-indenting or tidying makes every line look changed and almost guarantees a conflict. The repo's rules already tell Claude not to.</li>
+  </ul>
+  <div class="hint warn"><p><span class="label">Stop</span>If Git says every line of the post has changed, what's really changed, almost every time, is the line endings. The repo stores <code>.cps</code> and <code>.nc</code> files one way and gives you Windows line endings on your PC, which is what the controls expect. Don't commit it. Ask Claude to check what happened.</p></div>
+</section>
+
+<section class="chapter" aria-labelledby="c8">
+  <span class="station" aria-hidden="true">8</span>
+  <h2 id="c8">Which post cut this part?</h2>
+  <div class="prose">
+    <p>When a part comes off wrong, one of the first questions is which version of the post wrote the program. Tags answer it. A tag is a permanent name on one commit, like a revision letter on a drawing. Each time you upload a new version to the Fusion Hub, tag <code>main</code> and send the tag to GitHub:</p>
+  </div>
+  <div class="prompt"><span class="k">Ask Claude</span><p>Pull main, tag it as okuma-2026-10-16 and push the tag.</p></div>
+  <p class="under">What Claude runs: <code>git switch main</code> <code>git pull</code> <code>git tag okuma-2026-10-16</code> <code>git push origin okuma-2026-10-16</code></p>
+  <div class="prose" style="margin-top:20px">
+    <p>The date-based name is a suggestion. Any scheme works, as long as everyone uses the same one. If two releases go out on the same day, add a letter.</p>
+    <p>The regression diff can then compare against any release, which shows exactly how today's post differs from the one that cut that part:</p>
+  </div>
+  <div class="prompt"><span class="k">Ask Claude</span><p>Compare today's post against the okuma-2026-10-16 release on the M560 4ax cyclic.</p></div>
+  <p class="under">What Claude runs: <code>post-diff.js diff --ref okuma-2026-10-16 --machine "Okuma M560 4ax cyclic" …</code></p>
+</section>
+
+<section class="chapter" aria-labelledby="c9">
+  <span class="station end" aria-hidden="true">9</span>
+  <h2 id="c9">Cheat sheet</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>To do this</th><th>Ask Claude</th><th>What Claude runs</th></tr></thead>
+      <tbody>
+        <tr><td>Get the latest main</td><td>Switch to main and pull.</td><td><code>git switch main</code><br><code>git pull</code></td></tr>
+        <tr><td>Start a change</td><td>Start a branch called m460-mist-collector.</td><td><code>git switch -c m460-mist-collector</code></td></tr>
+        <tr><td>See what you've changed</td><td>What have I changed so far?</td><td><code>git status</code><br><code>git diff</code></td></tr>
+        <tr><td>Prove it</td><td>Run the regression diff against main for the M560 4ax cyclic.</td><td><code>node .claude/skills/post-regression-diff/scripts/post-diff.js diff --post okuma-kennewell-cnc.cps --machine "Okuma M560 4ax cyclic" --ref main --category Milling</code></td></tr>
+        <tr><td>Save it</td><td>Commit the post with a message saying what the machine does differently.</td><td><code>git add okuma-kennewell-cnc.cps</code><br><code>git commit</code></td></tr>
+        <tr><td>Share it</td><td>Push this branch and open a pull request.</td><td><code>git push -u origin m460-mist-collector</code></td></tr>
+        <tr><td>Review a branch</td><td>Check out okuma-g97-after-work-offset and run the regression diff against main.</td><td><code>git fetch</code><br><code>git switch okuma-g97-after-work-offset</code></td></tr>
+        <tr><td>Catch up with main</td><td>Merge main into my branch.</td><td><code>git merge main</code></td></tr>
+        <tr><td>Mark a release</td><td>Tag main as okuma-2026-10-16 and push the tag.</td><td><code>git tag okuma-2026-10-16</code><br><code>git push origin okuma-2026-10-16</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="closing">Claude won't commit, push or open a pull request in this repo unless you ask it to. That's one of the repo's rules, so you always decide when work leaves your PC.</p>
+</section>
+
+</main>
+
+<script>
+/* Review playground: four example pull requests. Each line is [class, text]. */
+var CASES = [
+  {
+    intent: "Output G97 (coordinate recalculation) on its own line after every work offset selection, as Okuma recommends. Posted on the M560 4ax cyclic.",
+    summary: [
+      ["dim","MACHINE Okuma M560 4ax cyclic.mch"],
+      ["wn","  [ CHANGED   ]  5x_contour.cnc      +1 -0"],
+      ["wn","  [ CHANGED   ]  Rapid_out.cnc       +1 -0"],
+      ["wn","  [ CHANGED   ]  2d_pocket.cnc       +1 -0"],
+      ["wn","  [ CHANGED   ]  peck_drill.cnc      +1 -0"],
+      ["",""],
+      ["","Summary: 0 unchanged, 4 changed, 0 regressed, 0 inapplicable"],
+      ["wn","Result:  DIFFERENCES (review each diff: confirm only the intended lines moved)"]
+    ],
+    nc: [
+      ["dim","5x contour.nc"],
+      ["","  G116 T2"],
+      ["","  S5000 M03"],
+      ["","  G17 G90 G94"],
+      ["","  G15 H01"],
+      ["ok","+ G97 (COORDINATE RECALCULATION FUNCTION)"],
+      ["","  M16"],
+      ["","  G00 A330."],
+      ["","  M08"]
+    ],
+    right: "approve",
+    yes: "Every program has a work offset, so every file changing is what you'd expect. Each changed by exactly one line, and that line is the G97 straight after G15 H01, on its own block. Nothing else moved.",
+    no: "This one is good. Every file changed, but by one line each, and that line is exactly what the description promised: G97 on its own block after G15 H01. A change that touches every program isn't a problem when every program should get it."
+  },
+  {
+    intent: "Write drilling cycle feeds with a decimal point (F400. instead of F400), to match the shop's older programs. Posted on the M560 4ax cyclic.",
+    summary: [
+      ["dim","MACHINE Okuma M560 4ax cyclic.mch"],
+      ["wn","  [ CHANGED   ]  5x_contour.cnc      +214 -214"],
+      ["wn","  [ CHANGED   ]  Rapid_out.cnc       +1 -1"],
+      ["wn","  [ CHANGED   ]  2d_pocket.cnc       +96 -96"],
+      ["wn","  [ CHANGED   ]  peck_drill.cnc      +1 -1"],
+      ["",""],
+      ["","Summary: 0 unchanged, 4 changed, 0 regressed, 0 inapplicable"],
+      ["wn","Result:  DIFFERENCES (review each diff: confirm only the intended lines moved)"]
+    ],
+    nc: [
+      ["dim","2d pocket.nc"],
+      ["","  G00 X-25. Y10."],
+      ["","  Z15."],
+      ["err","- G01 Z-2. F400"],
+      ["ok","+ G01 Z-2. F400."],
+      ["err","- X25. F1200"],
+      ["ok","+ X25. F1200."],
+      ["err","- Y-10. F1200"],
+      ["ok","+ Y-10. F1200."]
+    ],
+    right: "reject",
+    yes: "The drilling programs changed by one line each, which fits. But the contour and pocket programs changed by hundreds of lines, and they're G01 milling feeds, not drilling cycles. The edit changed the feed number format the whole post shares, so every feed moved. It needs a separate format for the cycle feed, then a fresh diff.",
+    no: "Look at the line counts. The drilling files changed by one line each, but the pocket and contour changed by hundreds, and those lines are G01 milling feeds. The edit changed the feed format the whole post shares, so every feed in every program moved. That's not what the description says. Send it back."
+  },
+  {
+    intent: "Turn 'Use mist collector' on by default, so nobody forgets it. Posted on the M560 4ax cyclic and the M460.",
+    summary: [
+      ["dim","MACHINE Okuma M560 4ax cyclic.mch"],
+      ["wn","  [ CHANGED   ]  5x_contour.cnc      +2 -0"],
+      ["wn","  [ CHANGED   ]  Rapid_out.cnc       +2 -0"],
+      ["dim","MACHINE Okuma M460 3ax.mch"],
+      ["err","  [ REGRESSED ]  Rapid_out.cnc       candidate failed: The mist collector M-codes"],
+      ["err","                                     are not defined for this machine model (baseline posted)"],
+      ["err","  [ REGRESSED ]  2d_pocket.cnc       candidate failed (baseline posted)"],
+      ["",""],
+      ["","Summary: 0 unchanged, 2 changed, 2 regressed, 0 inapplicable"],
+      ["err","Result:  FAIL (regressions: edit broke posting on a file the baseline posted)"]
+    ],
+    nc: [
+      ["dim","Rapid out.nc (M560 4ax cyclic)"],
+      ["","  G40 G80 G90 G94 G17"],
+      ["","  M32 (AUTO DOOR CLOSE)"],
+      ["ok","+ M369 (MIST COLLECTOR ON)"],
+      ["","  M279 (CHIP CONVEYOR ON)"],
+      ["","  G21"]
+    ],
+    right: "reject",
+    yes: "The M560 output looks fine, but programs for the M460 that posted yesterday now refuse to post, because the post only knows the mist collector codes for the M560 models. A FAIL result is always a send-back, however good the rest looks.",
+    no: "The M560 lines look fine, but read the second machine. Programs for the M460 that posted before now fail, because the post only knows the mist collector codes for the M560 models. A FAIL result is always a send-back."
+  },
+  {
+    intent: "Add the mist collector on and off codes for the GENOS M560V-5AX, so it can use the mist collector like the M560s. Posted on the GENOS M560V-5AX.",
+    summary: [
+      ["dim","MACHINE OKUMA GENOS M560V-5AX.mch"],
+      ["ok","  [ unchanged ]  5x_contour.cnc"],
+      ["ok","  [ unchanged ]  Rapid_out.cnc"],
+      ["ok","  [ unchanged ]  2d_pocket.cnc"],
+      ["ok","  [ unchanged ]  peck_drill.cnc"],
+      ["",""],
+      ["","Summary: 4 unchanged, 0 changed, 0 regressed, 0 inapplicable"],
+      ["ok","Result:  CLEAN"]
+    ],
+    nc: [
+      ["dim","No NC lines changed in any file."]
+    ],
+    right: "reject",
+    yes: "The change was meant to add lines, and nothing changed, so the diff never tested it. The mist collector is off by default, so the test posts never reached the new code. Re-run with the property switched on (--property useMistCollector true) and check the on and off codes appear where they should.",
+    no: "Clean sounds good, but this change was meant to add lines and nothing moved. The mist collector is off by default, so the test posts never reached the new code. The diff hasn't proven anything yet. Send it back to be re-run with --property useMistCollector true."
+  }
+];
+
+(function(){
+  var tabs=document.getElementById('tabs'),intent=document.getElementById('intent'),summary=document.getElementById('summary'),
+      nc=document.getElementById('nc'),fb=document.getElementById('feedback'),progress=document.getElementById('progress');
+  var cur=0,answered={};
+  function lines(target,arr){
+    target.textContent='';
+    arr.forEach(function(l){var d=document.createElement('div');if(l[0])d.className=l[0];d.textContent=l[1]||'\u00a0';target.appendChild(d);});
+  }
+  function drawTabs(){
+    tabs.textContent='';
+    CASES.forEach(function(c,i){
+      var b=document.createElement('button');b.className='btn small'+(answered[i]?' tab-done':'');b.textContent='PR '+(i+1);
+      b.setAttribute('aria-pressed',i===cur?'true':'false');b.onclick=function(){show(i);};tabs.appendChild(b);
+    });
+    var n=Object.keys(answered).length,r=Object.keys(answered).filter(function(k){return answered[k];}).length;
+    progress.textContent=n?(r+' of '+n+' called right'):'';
+  }
+  function show(i){
+    cur=i;var c=CASES[i];
+    intent.textContent=c.intent;lines(summary,c.summary);lines(nc,c.nc);
+    fb.hidden=true;drawTabs();
+  }
+  function judge(choice){
+    var c=CASES[cur],ok=choice===c.right;answered[cur]=ok;
+    fb.className='feedback '+(ok?'right':'wrong');fb.textContent='';
+    var h=document.createElement('p');h.className='head';
+    h.textContent=ok?(c.right==='approve'?'Approve is right.':'Send it back is right.'):(c.right==='approve'?'This one should be approved.':'This one should go back.');
+    var p=document.createElement('p');p.textContent=ok?c.yes:c.no;
+    fb.appendChild(h);fb.appendChild(p);
+    if(cur<CASES.length-1){var nx=document.createElement('button');nx.className='btn';nx.textContent='Next example';nx.onclick=function(){show(cur+1);};var w=document.createElement('p');w.appendChild(nx);fb.appendChild(w);}
+    fb.hidden=false;drawTabs();
+  }
+  document.getElementById('approve').onclick=function(){judge('approve');};
+  document.getElementById('reject').onclick=function(){judge('reject');};
+  show(0);
+})();
+</script>
+
+</body></html>

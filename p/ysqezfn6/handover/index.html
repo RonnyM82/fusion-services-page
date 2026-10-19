@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="bingbot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="referrer" content="no-referrer">
+<title>Training week handover: Kennewell CNC Machining</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --lt-surface-page:#FFFFFF;
+  --lt-surface-subtle:#F8F8F8;
+  --lt-surface-panel:#FFFFFF;
+  --lt-surface-shell:#2A2A2A;
+  --lt-text-on-shell:#EEEEEE;
+  --lt-text-on-shell-muted:#A8A8A8;
+  --lt-text-primary:#2A2A2A;
+  --lt-text-secondary:#565554;
+  --lt-border-interactive:#868686;
+  --lt-border-subtle:#DEDEDE;
+  --lt-action:#1F1BAB;
+  --lt-action-bg-hover:#180098;
+  --lt-text-link:#17058F;
+  --lt-brand-red:#ED1C24;
+  --lt-warning-text:#724700;
+  --lt-warning-fill:#F5A300;
+}
+
+*{box-sizing:border-box;}
+
+html{-webkit-text-size-adjust:100%;}
+
+body{
+  margin:0;
+  background:var(--lt-surface-page);
+  color:var(--lt-text-primary);
+  font-family:"Inter",Arial,Helvetica,sans-serif;
+  font-feature-settings:"ss02" 1;
+  font-size:18px;
+  line-height:1.6;
+}
+
+.num{font-feature-settings:"ss02" 1,"tnum" 1;}
+
+.mono{
+  font-family:"JetBrains Mono",Cascadia Mono,Consolas,"Courier New",monospace;
+  font-feature-settings:"zero" 1;
+}
+
+/* ---------- shell ---------- */
+
+.lt-shell{
+  background:var(--lt-surface-shell);
+  color:var(--lt-text-on-shell);
+  padding:44px 32px 40px;
+}
+
+.shell-inner{max-width:780px;margin:0 auto;}
+
+.logotype{
+  display:block;
+  width:200px;
+  height:auto;
+  margin:0 0 30px;
+}
+
+.lt-shell h1{
+  font-weight:900;
+  font-size:44px;
+  line-height:1.1;
+  letter-spacing:-0.02em;
+  margin:0 0 24px;
+  color:var(--lt-text-on-shell);
+  max-width:16ch;
+}
+
+.meta{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:4px 20px;
+  margin:0;
+  font-size:16px;
+}
+
+.meta dt{
+  color:var(--lt-text-on-shell-muted);
+  font-weight:500;
+}
+
+.meta dd{margin:0;color:var(--lt-text-on-shell);}
+
+/* ---------- panel ---------- */
+
+.lt-panel{
+  background:var(--lt-surface-panel);
+  max-width:780px;
+  margin:0 auto;
+  padding:48px 32px 80px;
+}
+
+.lede{
+  font-size:21px;
+  line-height:1.55;
+  margin:0 0 8px;
+  max-width:60ch;
+}
+
+p{max-width:68ch;}
+
+h2{
+  font-weight:700;
+  font-size:30px;
+  line-height:1.2;
+  letter-spacing:-0.015em;
+  margin:56px 0 20px;
+  padding-top:28px;
+  border-top:1px solid var(--lt-border-subtle);
+}
+
+h2 .idx{
+  color:var(--lt-action);
+  font-family:"JetBrains Mono",Consolas,monospace;
+  font-feature-settings:"zero" 1;
+  font-size:1em;
+  margin-right:14px;
+}
+
+h3{
+  font-weight:700;
+  font-size:19px;
+  margin:32px 0 6px;
+}
+
+ul{padding-left:22px;margin:16px 0;max-width:66ch;}
+li{margin-bottom:8px;}
+
+.label{
+  font-weight:700;
+  margin-bottom:2px;
+}
+
+/* ---------- price callout ---------- */
+
+.price{
+  border-left:4px solid var(--lt-action);
+  background:var(--lt-surface-subtle);
+  padding:16px 20px;
+  margin:28px 0;
+  max-width:66ch;
+}
+
+.price .figure{
+  font-family:"JetBrains Mono",Consolas,monospace;
+  font-feature-settings:"zero" 1,"tnum" 1;
+  font-size:26px;
+  font-weight:700;
+  color:var(--lt-action);
+  display:block;
+  line-height:1.2;
+}
+
+.price .qualifier{
+  display:block;
+  font-size:16px;
+  color:var(--lt-text-secondary);
+  margin-top:4px;
+}
+
+/* ---------- optional block ---------- */
+
+.optional{
+  border:1px solid var(--lt-border-subtle);
+  padding:20px 22px;
+  margin:28px 0;
+  max-width:66ch;
+}
+
+.optional p:last-child{margin-bottom:0;}
+.optional p:first-child{margin-top:0;}
+
+/* ---------- table ---------- */
+
+.table-wrap{overflow-x:auto;margin:24px 0;}
+
+table{
+  border-collapse:collapse;
+  width:100%;
+  font-size:17px;
+}
+
+thead th{
+  text-align:left;
+  font-weight:700;
+  border-bottom:2px solid var(--lt-border-interactive);
+  padding:10px 12px;
+}
+
+thead th:last-child{text-align:right;}
+
+tbody td{
+  border-bottom:1px solid var(--lt-border-subtle);
+  padding:11px 12px;
+  vertical-align:top;
+}
+
+tbody tr:nth-child(even){background:var(--lt-surface-subtle);}
+
+td.figure{
+  text-align:right;
+  white-space:nowrap;
+  font-family:"JetBrains Mono",Consolas,monospace;
+  font-feature-settings:"zero" 1,"tnum" 1;
+  font-weight:500;
+}
+
+td.sub{color:var(--lt-text-secondary);font-size:16px;}
+
+/* ---------- placeholder ---------- */
+
+.fill{
+  background:var(--lt-warning-fill);
+  color:var(--lt-text-primary);
+  padding:1px 7px;
+  font-weight:500;
+  font-size:0.92em;
+  white-space:nowrap;
+}
+
+.fill::before{content:"fill in: ";font-weight:700;}
+
+/* ---------- footer ---------- */
+
+.next{
+  border-top:1px solid var(--lt-border-subtle);
+  margin-top:56px;
+  padding-top:28px;
+}
+
+a{color:var(--lt-text-link);}
+a:hover{color:var(--lt-action-bg-hover);}
+a:focus-visible{outline:3px solid var(--lt-action);outline-offset:2px;}
+
+.secondary{color:var(--lt-text-secondary);}
+
+@media (max-width:640px){
+  body{font-size:17px;}
+  .lt-shell{padding:32px 20px 28px;}
+  .lt-shell h1{font-size:32px;}
+  .lt-panel{padding:36px 20px 56px;}
+  h2{font-size:25px;margin-top:44px;}
+  .lede{font-size:19px;}
+  .price .figure{font-size:23px;}
+}
+
+@media print{
+  body{font-size:11pt;}
+  .lt-shell{
+    padding:24pt 0;
+    background-image:none;
+    background-color:var(--lt-surface-shell);
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  .lt-panel{padding:18pt 0;max-width:none;}
+  h2{page-break-after:avoid;margin-top:24pt;}
+  .price,.optional,table{page-break-inside:avoid;}
+  .fill{border:1px solid var(--lt-text-primary);}
+}
+
+/* ---------- handover additions ---------- */
+
+.lt-shell a.on-shell{color:var(--lt-text-on-shell);}
+.lt-shell a.on-shell:hover{color:#FFFFFF;}
+
+.places dl{margin:12px 0 0;}
+.places dl > div{display:grid;grid-template-columns:minmax(10rem,13rem) 1fr;gap:2px 18px;padding:10px 0;border-top:1px solid var(--lt-border-subtle);}
+.places dt{font-weight:700;}
+.places dd{margin:0;min-width:0;overflow-wrap:anywhere;}
+
+.res{list-style:none;padding:0;margin:20px 0 8px;max-width:66ch;border-top:1px solid var(--lt-border-subtle);}
+.res li{display:grid;grid-template-columns:5rem 1fr;gap:2px 14px;padding:12px 0;margin:0;border-bottom:1px solid var(--lt-border-subtle);}
+.res .kind{font-size:15px;color:var(--lt-text-secondary);padding-top:3px;}
+.res a{font-weight:500;}
+.res p{margin:2px 0 0;font-size:16px;}
+
+table.families thead th:last-child{text-align:left;}
+table.families td:first-child{font-weight:500;min-width:11rem;}
+
+@media (max-width:640px){
+  .places dl > div,.res li{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<header class="lt-shell">
+  <div class="shell-inner">
+    <img class="logotype" alt="Livetools" width="752" height="108" src="data:image/webp;base64,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cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjUuMCAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDI2LTA4LTI3VDA2OjM1OjU5KzA4OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyNi0wOC0yN1QwNjozNjoxNiswODowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyNi0wOC0yN1QwNjozNjoxNiswODowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2MjMxM2QtOGEyMy0zZDQxLWFlN2UtZjU0MzMyNTFhNDMwIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOmFkNjIzMTNkLThhMjMtM2Q0MS1hZTdlLWY1NDMzMjUxYTQzMCIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOmFkNjIzMTNkLThhMjMtM2Q0MS1hZTdlLWY1NDMzMjUxYTQzMCI+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6YWQ2MjMxM2QtOGEyMy0zZDQxLWFlN2UtZjU0MzMyNTFhNDMwIiBzdEV2dDp3aGVuPSIyMDI2LTA4LTI3VDA2OjM1OjU5KzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjUuMCAoV2luZG93cykiLz4gPC9yZGY6U2VxPiA8L3htcE1NOkhpc3Rvcnk+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+">
+    <h1>Training week handover</h1>
+    <dl class="meta">
+      <dt>For</dt><dd>Kennewell CNC Machining, Murray Bridge, South Australia</dd>
+      <dt>From</dt><dd>Scott Moyse, Livetools</dd>
+      <dt>Week</dt><dd>October 2026</dd>
+      <dt>Proposal</dt><dd><a class="on-shell" href="/p/ysqezfn6/">Getting your 5-axis Okuma commissioned</a></dd>
+    </dl>
+  </div>
+</header>
+
+<main class="lt-panel">
+
+  <p class="lede">What we got through, set against the proposal, and where everything I've left with you lives: the post processor repo, machine configurations, videos, example datasets and reference pages.</p>
+
+  <div class="optional places">
+    <p class="label">Where things live</p>
+    <p class="secondary">The Fusion Team links open in your Kennewell hub, so you'll need to be signed in.</p>
+    <dl>
+      <div><dt>Post processors</dt><dd><a href="https://github.com/Kennewell-CNC/kennewell-cnc-posts" target="_blank" rel="noopener">kennewell-cnc-posts</a> on GitHub</dd></div>
+      <div><dt>Machine configurations</dt><dd>The <a href="https://github.com/Kennewell-CNC/kennewell-cnc-posts/tree/main/machines" target="_blank" rel="noopener"><span class="mono">/machines</span> folder</a> of the same repo, and the <a href="https://kennewell.autodesk360.com/g/projects/D20191111236890501/data/dXJuOmFkc2sud2lwcHJvZDpmcy5mb2xkZXI6Y28uMUVrU1dFN1lRQUdnVWtHRENmclVoZw" target="_blank" rel="noopener">Assets project</a> on your Team hub</dd></div>
+      <div><dt>CAD and CAM examples</dt><dd><a href="https://kennewell.autodesk360.com/g/projects/20211229479971751/data/dXJuOmFkc2sud2lwcHJvZDpmcy5mb2xkZXI6Y28uQWh4MmdBNkFTUnk3ajQ5WTB0YzhMUQ" target="_blank" rel="noopener">CAM datasets folder</a> on your Team hub</dd></div>
+      <div><dt>Surfacing</dt><dd><a href="https://kennewell.autodesk360.com/g/projects/20211229479971751/data/dXJuOmFkc2sud2lwcHJvZDpmcy5mb2xkZXI6Y28ualk1OWd3cDFTNWFwRXhJQnRMNTNyZw" target="_blank" rel="noopener">Surfacing datasets folder</a> on your Team hub, plus the <a href="https://claude.ai/artifact/Pzhwh8Bv3aAAMKJvFwjoqg" target="_blank" rel="noopener">slides</a> and <a href="https://youtu.be/bsXB-ZeM0ZI" target="_blank" rel="noopener">video</a></dd></div>
+    </dl>
+  </div>
+
+  <h2><span class="idx">1</span>Machine simulation setup in Fusion</h2>
+
+  <p>The machine's 3D model has been rationalised and simplified for machine simulation in Fusion, and the rotary axes validated.</p>
+  <p>These two videos cover the simplification approach.</p>
+
+  <ul class="res">
+    <li><span class="kind">Video</span><div><a href="https://youtu.be/0wM-2Ohdk8U" target="_blank" rel="noopener">Model Simplification Workflow &amp; Tips</a> <span class="secondary">20 min</span></div></li>
+    <li><span class="kind">Video</span><div><a href="https://youtu.be/7jR3RaVM8-E" target="_blank" rel="noopener">Boundary Fill for Simplification</a></div></li>
+  </ul>
+
+  <h2><span class="idx">2</span>Five-axis post processor</h2>
+
+  <p>Every change you'd already made to the posts has been migrated into GitHub, so the full change history is there. A few of those changes didn't follow post editing best practice. I corrected them, and we went over the reasoning together.</p>
+
+  <h3>Five machine configurations</h3>
+  <p>There are now five machine configurations. Where a post property belongs to the machine and not the job, it's been moved onto the machine configuration, so nobody has to remember to set it in every NC program.</p>
+
+  <ul class="res">
+    <li><span class="kind">Page</span><div><a href="/resources/how-git-works/">How Git works</a><p>Start here if Git is still new. Commits, branches, push and pull, how a team shares the work, and what happens when two people change the same line.</p></div></li>
+    <li><span class="kind">Page</span><div><a href="/p/ysqezfn6/post-workflow/">Changing the posts as a team</a><p>Your post workflow: setting up a new PC, the life of a post change, proving it, reviewing someone else's change, and tracing which post cut a part.</p></div></li>
+    <li><span class="kind">Repo</span><div><a href="https://github.com/Kennewell-CNC/kennewell-cnc-posts" target="_blank" rel="noopener">kennewell-cnc-posts</a><p>The posts and their history. <span class="mono">main</span> is the production post.</p></div></li>
+    <li><span class="kind">Repo</span><div><a href="https://github.com/Kennewell-CNC/kennewell-cnc-posts/tree/main/machines" target="_blank" rel="noopener"><span class="mono">/machines</span> in kennewell-cnc-posts</a><p>The five machine configurations, tracked alongside the posts.</p></div></li>
+    <li><span class="kind">Folder</span><div><a href="https://kennewell.autodesk360.com/g/projects/D20191111236890501/data/dXJuOmFkc2sud2lwcHJvZDpmcy5mb2xkZXI6Y28uMUVrU1dFN1lRQUdnVWtHRENmclVoZw" target="_blank" rel="noopener">Assets project</a><p>The machine configurations on your Team hub.</p></div></li>
+  </ul>
+
+  <h2><span class="idx">3</span>Advanced Fusion CAM training for simultaneous five-axis</h2>
+
+  <p>We worked through programming parts scheduled to run on the Okuma Genos M560-5AX, picking up the 5-axis theory as each part needed it.</p>
+
+  <h3>Lead, lean and the trunnion</h3>
+  <p>5-axis kinematic basics: how lead and lean on the tool change the tilt and turn of the A/C trunnion.</p>
+  <ul class="res">
+    <li><span class="kind">Page</span><div><a href="/resources/lead-lean-ac-trunnion/">Lead and lean on an A/C trunnion</a><p>Interactive. Change lead and lean and watch what the trunnion has to do to follow.</p></div></li>
+  </ul>
+
+  <h3>4-axis pulley</h3>
+  <p>Rotary Pocket roughing, then Rotary Parallel and Spiral.</p>
+  <p>Rotary Pocket behaves like Parallel, so it's good on shallow surfaces. Rotary Contour behaves like 3D Contour, so it's the better choice on steep surfaces. Rotary Parallel can sit in between the two in some areas, but it's mainly a surfacing-only toolpath.</p>
+
+  <h3>5-axis Y pipe flange</h3>
+  <p>Various 3D surfacing strategies with 5-axis enabled. We went through the primary 5-axis modes, then how the additional settings layer more control on top of them, including automatic and guided collision avoidance.</p>
+  <p>We also covered 3+3 roughing, and how to apply and control it.</p>
+
+  <h3>Electronics enclosure</h3>
+  <p>Toolpath modifications, and multi-axis finishing with circular segment tools.</p>
+
+  <h3>Surface quality and toolpath quality</h3>
+  <p>The quality of the surfaces you machine has a direct effect on the quality of the toolpath, and how much it matters depends on how the toolpath reads the model. We grouped the 3D and 5-axis toolpaths that way:</p>
+
+  <div class="table-wrap">
+  <table class="families">
+    <thead><tr><th>How it reads the model</th><th>Toolpaths</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td>Slices an STL of the model</td><td>3D Contour, Parallel, Steep and Shallow, and others</td><td class="sub">Check the Surface Triangulation tolerance in Compare and Edit</td></tr>
+      <tr><td>Extracts surface isoparms</td><td>Flow</td><td class="sub"></td></tr>
+      <tr><td>Follows curves along a surface</td><td>Blend (both modes), Geodesic Blend</td><td class="sub"></td></tr>
+      <tr><td>Curves only, no model</td><td>Multi-axis Contour, Swarf, Advanced Swarf</td><td class="sub"></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>We didn't do any surface modelling training this week. Everything you need to work through it in your own time is here:</p>
+  <ul class="res">
+    <li><span class="kind">Video</span><div><a href="https://youtu.be/bsXB-ZeM0ZI" target="_blank" rel="noopener">Jake Fowler: Fusion 360 Surfacing Under The Hood</a><p>Jake's surfacing class, recorded live at the Fusion 360 Academy in 2019.</p></div></li>
+    <li><span class="kind">Slides</span><div><a href="https://claude.ai/artifact/Pzhwh8Bv3aAAMKJvFwjoqg" target="_blank" rel="noopener">Surfacing slides</a><p>The slides that go with the video. I'll keep updating these, so this link always has the latest.</p></div></li>
+    <li><span class="kind">Folder</span><div><a href="https://kennewell.autodesk360.com/g/projects/20211229479971751/data/dXJuOmFkc2sud2lwcHJvZDpmcy5mb2xkZXI6Y28ualk1OWd3cDFTNWFwRXhJQnRMNTNyZw" target="_blank" rel="noopener">Surfacing datasets</a><p>The models to follow along with, on your Team hub.</p></div></li>
+  </ul>
+
+  <h3>Workholding in CAD and CAM</h3>
+  <p>Tips and tricks for simplifying and setting up workholding models, including sliding and symmetrical joints and basic Configurations. We then walked through using the workholding in a CAM setup, and offsetting it.</p>
+  <p>The simplification videos in section 1 apply to workholding models too.</p>
+  <ul class="res">
+    <li><span class="kind">Video</span><div><a href="https://youtu.be/lGih36l2baw" target="_blank" rel="noopener">Basic Workholding Configurations</a> <span class="secondary">4 min</span></div></li>
+  </ul>
+
+  <h3>CAD and CAM examples</h3>
+  <p>Dozens of CAD and CAM examples to refer back to when you hit a similar part or toolpath problem.</p>
+  <ul class="res">
+    <li><span class="kind">Folder</span><div><a href="https://kennewell.autodesk360.com/g/projects/20211229479971751/data/dXJuOmFkc2sud2lwcHJvZDpmcy5mb2xkZXI6Y28uQWh4MmdBNkFTUnk3ajQ5WTB0YzhMUQ" target="_blank" rel="noopener">CAM datasets</a><p>On your Team hub.</p></div></li>
+  </ul>
+
+  <h2>Modifying your own posts with AI</h2>
+
+  <p>Claude Skills are set up to run a post change through all five machine configurations, so you can see what a change does to the NC code on every machine before it goes into production.</p>
+  <p>How to use it is written up in the post workflow page, under <em>Proving a change with the regression diff</em>.</p>
+  <ul class="res">
+    <li><span class="kind">Page</span><div><a href="/p/ysqezfn6/post-workflow/">Changing the posts as a team</a></div></li>
+  </ul>
+
+  <h2>Offline work and what's coming</h2>
+
+  <p>For any job whose data can't be stored on Autodesk's servers, the AirGap add-in forces Fusion into offline mode, blocks cloud saves, and has you export locally instead.</p>
+  <p>Read the limitations in its README before relying on it. Fusion still has to go online every 14 days to validate its licence, so plan that work inside the window.</p>
+  <ul class="res">
+    <li><span class="kind">Repo</span><div><a href="https://github.com/infab-app/airgap-fusion" target="_blank" rel="noopener">airgap-fusion</a><p>Open-source Fusion add-in by Infab Softworks.</p></div></li>
+  </ul>
+
+  <p>Autodesk have also announced local data control for Fusion for Manufacturing. You'll be able to choose, design by design, to keep data under your own control while still working in Fusion. It's planned for the Fusion Insider Program from 17 November, with general availability targeted for 19 January. Those are Autodesk's dates and they may change.</p>
+  <ul class="res">
+    <li><span class="kind">Article</span><div><a href="https://www.autodesk.com/products/fusion-360/blog/your-fusion-data-where-you-need-it/" target="_blank" rel="noopener">Your Fusion data, where you need it</a><p>Autodesk's announcement on the Fusion blog.</p></div></li>
+    <li><span class="kind">Program</span><div><a href="https://feedback.autodesk.com/key/Fusion360Insider" target="_blank" rel="noopener">Join the Fusion Insider Program</a><p>Get new features before release and give feedback while they're still in development. This is where local data control turns up first.</p></div></li>
+  </ul>
+
+  <div class="next">
+    <h2 style="margin-top:0;padding-top:0;border-top:none;">Questions</h2>
+    <p>If anything here doesn't make sense, or a link won't open for you, flick me an email at <a href="mailto:scott@livetools.com.au">scott@livetools.com.au</a>.</p>
+  </div>
+
+</main>
+
+</body>
+</html>
