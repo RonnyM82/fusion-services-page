@@ -56,7 +56,7 @@ body{
 .lt-shell{
   background:var(--lt-surface-shell);
   color:var(--lt-text-on-shell);
-  padding:44px 32px 40px;
+  padding:44px 32px 0;
 }
 
 .shell-inner{max-width:780px;margin:0 auto;}
@@ -92,6 +92,90 @@ body{
 }
 
 .meta dd{margin:0;color:var(--lt-text-on-shell);}
+
+/* ---------- version tabs ---------- */
+
+.tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px;
+  margin:36px 0 0;
+}
+
+.tabs [role="tab"]{
+  appearance:none;
+  background:transparent;
+  border:0;
+  border-top:3px solid transparent;
+  border-radius:0;
+  color:var(--lt-text-on-shell-muted);
+  cursor:pointer;
+  font:500 16px/1.3 "Inter",Arial,Helvetica,sans-serif;
+  font-feature-settings:"ss02" 1;
+  padding:12px 18px 14px;
+}
+
+.tabs [role="tab"]:hover{color:var(--lt-text-on-shell);}
+
+.tabs [role="tab"][aria-selected="true"]{
+  background:var(--lt-surface-page);
+  border-top-color:var(--lt-action);
+  color:var(--lt-text-primary);
+  font-weight:700;
+}
+
+.tabs [role="tab"]:focus-visible{outline:3px solid var(--lt-action);outline-offset:-3px;}
+
+[role="tabpanel"]:focus{outline:none;}
+
+/* ---------- session list ---------- */
+
+.sessions{
+  list-style:none;
+  padding:0;
+  margin:16px 0 8px;
+  max-width:none;
+  border-top:1px solid var(--lt-border-subtle);
+}
+
+.sessions li{
+  display:grid;
+  grid-template-columns:150px 1fr;
+  gap:4px 24px;
+  padding:16px 0;
+  margin:0;
+  border-bottom:1px solid var(--lt-border-subtle);
+}
+
+.sessions .when{
+  font-family:"JetBrains Mono",Consolas,monospace;
+  font-feature-settings:"zero" 1,"tnum" 1;
+  font-size:15px;
+  line-height:1.5;
+  color:var(--lt-text-secondary);
+}
+
+.sessions .when .n{
+  display:block;
+  color:var(--lt-action);
+  font-weight:700;
+  font-size:17px;
+}
+
+.sessions h4{
+  font-size:18px;
+  font-weight:700;
+  margin:0 0 4px;
+}
+
+.sessions p{margin:0;}
+
+.sessions li.gap{
+  display:block;
+  color:var(--lt-text-secondary);
+  font-size:16px;
+  padding:12px 0;
+}
 
 /* ---------- panel ---------- */
 
@@ -248,8 +332,12 @@ a:focus-visible{outline:3px solid var(--lt-action);outline-offset:2px;}
 
 @media (max-width:640px){
   body{font-size:17px;}
-  .lt-shell{padding:32px 20px 28px;}
+  .lt-shell{padding:32px 20px 0;}
   .lt-shell h1{font-size:32px;}
+  .tabs{margin-top:28px;}
+  .tabs [role="tab"]{font-size:15px;padding:11px 14px 13px;}
+  .sessions li{grid-template-columns:1fr;}
+  .sessions .when .n{display:inline;margin-right:10px;}
   .lt-panel{padding:36px 20px 56px;}
   h2{font-size:25px;margin-top:44px;}
   .lede{font-size:19px;}
@@ -267,7 +355,9 @@ a:focus-visible{outline:3px solid var(--lt-action);outline-offset:2px;}
   }
   .lt-panel{padding:18pt 0;max-width:none;}
   h2{page-break-after:avoid;margin-top:24pt;}
-  .price,.optional,table{page-break-inside:avoid;}
+  .price,.optional,table,.sessions li{page-break-inside:avoid;}
+  .tabs{display:none;}
+  .lt-shell{padding-bottom:24pt;}
   .fill{border:1px solid var(--lt-text-primary);}
 }
 </style>
@@ -281,12 +371,18 @@ a:focus-visible{outline:3px solid var(--lt-action);outline-offset:2px;}
     <dl class="meta">
       <dt>For</dt><dd>Hullbot, Marrickville, Sydney</dd>
       <dt>From</dt><dd>Scott Moyse, Livetools</dd>
-      <dt>Date</dt><dd>4 September 2026</dd>
+      <dt>Date</dt><dd><span data-version="v1" hidden>4 September 2026</span><span data-version="v2">23 October 2026</span></dd>
     </dl>
+    <div class="tabs" role="tablist" aria-label="Proposal version">
+      <button type="button" role="tab" id="tab-v1" aria-controls="v1" aria-selected="false" tabindex="-1">V1 - Onsite</button>
+      <button type="button" role="tab" id="tab-v2" aria-controls="v2" aria-selected="true">V2 - Online Training</button>
+    </div>
   </div>
 </header>
 
 <main class="lt-panel">
+
+  <section id="v1" role="tabpanel" aria-labelledby="tab-v1" tabindex="-1" hidden>
 
   <p class="lede">With your Datron and rotary landing in November and nobody on the team having programmed CAM before, the goal is to get three of you comfortable taking a part from Onshape, through Fusion, to a program that works, and the rest of the team knowing enough to work alongside them. Four days on site in October: three days of structured training, then a fourth spent programming your own production parts so we can apply what you've learnt to your context.</p>
 
@@ -391,11 +487,225 @@ a:focus-visible{outline:3px solid var(--lt-action);outline-offset:2px;}
   </table>
   </div>
 
+  </section>
+
+  <section id="v2" role="tabpanel" aria-labelledby="tab-v2" tabindex="-1">
+
+  <p class="lede">The goal hasn't changed from the on-site version. I want three of you comfortable taking a part from Onshape, through Fusion, to a program that works, and the rest of the team knowing enough to work alongside them. This time it's online, two hours a day from 26 October to 17 November, with the dates built around your Datron being installed on 2 November.</p>
+
+  <h2><span class="idx">1</span>Who's being trained</h2>
+
+  <p>All six of you join the first four sessions. They're broad on purpose, so everyone comes out with the same picture of how Fusion is put together, what CAM actually does, and what a finished program looks like before it goes to the machine.</p>
+
+  <p>From session five the three people who'll be programming carry on. The other three are welcome on the first 20 minutes of any session, which I'll open with a recap of the last one and a look at what's coming. I'll record every session too, so anyone who misses one, or wants to see a bit again, can catch up.</p>
+
+  <p>You've got someone on the team who used Fusion a fair bit at university, which helps. A chunk of the CAD side will already be familiar to them and they'll pick up the CAM faster, so I'll anchor the pace at the other two.</p>
+
+  <h2><span class="idx">2</span>How the online version works</h2>
+
+  <p>Two hours a day keeps everyone fresh on a video call and leaves the rest of the day to have a go at what we covered. I'll finish each session with a short exercise, and we'll open the next one by picking through how you got on. Doing it yourself in between is where most of it sinks in.</p>
+
+  <p>The first week covers the core workflow and makes a start on 2.5-axis, so by the time the Datron lands you can already take a simple part through to a posted program. Your production parts come last. By then the machine should be running, so you can cut what we program and bring whatever happened back to the next session.</p>
+
+  <p>We'll run the same two-hour slot each day at a time that suits you. Sydney's two hours behind Christchurch, so a morning start your end is no trouble for me.</p>
+
+  <h2><span class="idx">3</span>The sessions</h2>
+
+  <p>The CAD for CAM content is spread through the sessions rather than taught as its own block, the same as on site. If Monday 26 October is too soon to get Fusion onto everyone's laptops, we start Tuesday and everything slides along a day.</p>
+
+  <h3>Week one: before the machine lands</h3>
+  <ol class="sessions">
+    <li>
+      <div class="when"><span class="n">Session 1</span>Mon 26 Oct<br>All six</div>
+      <div>
+        <h4>How Fusion holds your data</h4>
+        <p>We start with how Fusion stores projects and versions, how the Design and Manufacture workspaces relate to each other, and how I'd structure your projects so the CAM can optionally live in its own document and reference the design.</p>
+      </div>
+    </li>
+    <li>
+      <div class="when"><span class="n">Session 2</span>Tue 27 Oct<br>All six</div>
+      <div>
+        <h4>Onshape data and design changes</h4>
+        <p>We bring Onshape geometry across, look at the conventions that keep it tidy, and see what happens when the design changes after you've already programmed it. Getting this right early saves a lot of pain later.</p>
+      </div>
+    </li>
+    <li>
+      <div class="when"><span class="n">Session 3</span>Wed 28 Oct<br>All six</div>
+      <div>
+        <h4>Setups, stock and tools</h4>
+        <p>We cover setups, work coordinate systems and stock, and the machine configuration for the Datron, then move on to tools, holders and tool libraries. I'll get your tool library set up properly from the start, because every session after this one leans on it.</p>
+      </div>
+    </li>
+    <li>
+      <div class="when"><span class="n">Session 4</span>Thu 29 Oct<br>All six</div>
+      <div>
+        <h4>Your first program, end to end</h4>
+        <p>We program a simple part from start to finish with facing, contouring, pocketing and drilling, then simulate it and post it. Everyone sees the whole workflow before we go any deeper.</p>
+      </div>
+    </li>
+    <li>
+      <div class="when"><span class="n">Session 5</span>Fri 30 Oct<br>Programmers</div>
+      <div>
+        <h4>2.5-axis clearing and contouring</h4>
+        <p>We start with adaptive clearing and why it suits a machine like the Datron, then contour and pocket with the heights, passes and linking settings. After that it's pocket recognition and chain selection hygiene, so your toolpaths survive design changes.</p>
+      </div>
+    </li>
+  </ol>
+
+  <h3>Week two: install week</h3>
+  <ol class="sessions" start="6">
+    <li class="gap">There's no session on Monday 2 November, as that's install day.</li>
+    <li>
+      <div class="when"><span class="n">Session 6</span>Tue 3 Nov<br>Programmers</div>
+      <div>
+        <h4>Holes, chamfers and toolpath order</h4>
+        <p>This one covers bore milling, drilling cycles, tapping and chamfering, then toolpath ordering and rest machining. We'll also go through the tooltips and expressions, which are a great way to build understanding of the software once you realise they're there.</p>
+      </div>
+    </li>
+    <li>
+      <div class="when"><span class="n">Session 7</span>Wed 4 Nov<br>Programmers</div>
+      <div>
+        <h4>3-axis roughing and finishing</h4>
+        <p>We cover 3D adaptive roughing, then the finishing strategies and which one suits which sort of surface, and how much stock to leave between them.</p>
+      </div>
+    </li>
+    <li>
+      <div class="when"><span class="n">Session 8</span>Thu 5 Nov<br>Programmers</div>
+      <div>
+        <h4>Boundaries, rest machining and CAD for CAM</h4>
+        <p>We start with containment, boundaries and rest machining between operations. The second half is the modelling side, where you defeature, cap holes with surfaces and split faces to drive toolpath boundaries. Your parts are designed to represent their final state, so they typically don't contain the geometry the machining process needs, and you'll be adding it yourself.</p>
+      </div>
+    </li>
+    <li>
+      <div class="when"><span class="n">Session 9</span>Fri 6 Nov<br>Programmers</div>
+      <div>
+        <h4>Positional 4-axis setups</h4>
+        <p>A rotary changes how you think about a setup, so we go through tool orientation, one work coordinate system versus several, and indexing between faces.</p>
+      </div>
+    </li>
+  </ol>
+
+  <h3>Weeks three and four: the machine's running</h3>
+  <ol class="sessions" start="10">
+    <li>
+      <div class="when"><span class="n">Session 10</span>Mon 9 Nov<br>Programmers</div>
+      <div>
+        <h4>Rotary operations and simulation</h4>
+        <p>We lay out the operations so the part comes off the machine finished, and simulate all of it with stock, so you can see what the rotary is going to do before it does it.</p>
+      </div>
+    </li>
+    <li>
+      <div class="when"><span class="n">Session 11</span>Tue 10 Nov<br>Programmers</div>
+      <div>
+        <h4>Workholding</h4>
+        <p>We model your fixtures and vices as components, position the stock properly, and build setups that reflect what's actually bolted to the machine.</p>
+      </div>
+    </li>
+    <li>
+      <div class="when"><span class="n">Session 12</span>Wed 11 Nov<br>Programmers</div>
+      <div>
+        <h4>A full part, start to finish</h4>
+        <p>We take one of my datasets all the way through: Onshape geometry in, setups, 2.5 and 3-axis operations, a rotary setup, simulate, post.</p>
+      </div>
+    </li>
+    <li>
+      <div class="when"><span class="n">Sessions 13 to 16</span>Thu 12 Nov to Tue 17 Nov<br>Programmers</div>
+      <div>
+        <h4>Your production parts</h4>
+        <p>This is where everything gets applied to your actual work. Send me two or three of the parts you'll be running on the Datron by 5 November and we'll program them properly, building the tool library, workholding and setup templates you'll keep reusing from then on. If there are parts you're not sure how to approach, those are the ones to send.</p>
+      </div>
+    </li>
+  </ol>
+
+  <div class="price">
+    <span class="figure">$7,200</span>
+    <span class="qualifier">Sixteen two-hour sessions at <span class="num">$450</span> each, with no travel on top.</span>
+  </div>
+
+  <h2>What's not included</h2>
+
+  <p>Post processor setup and machine simulation configuration aren't part of this. If the Datron post turns out to need work once the machine lands, I'll quote that separately.</p>
+
+  <p>Simultaneous 4-axis isn't covered either. Positional work is what you'll use the rotary for most of the time and it's the right place to start.</p>
+
+  <h2>What I need from you</h2>
+  <ul>
+    <li>The Datron model and rotary confirmed, so the machine configuration matches what's arriving</li>
+    <li>Fusion installed and licensed for all six people before session one, on the laptops they'll actually use</li>
+    <li>A Fusion Training Project created in the Hullbot Fusion Hub, with scottmoyse@outlook.co.nz invited to it, so I can get datasets uploaded for people to use</li>
+    <li>Everyone on their own laptop with a decent connection and a headset. A second screen helps a lot, with me on one and your Fusion on the other</li>
+    <li>Two or three of your own parts sent through by 5 November, a week before the production part sessions</li>
+  </ul>
+
+  <h2>Pricing</h2>
+
+  <p>All prices in AUD, exclusive of GST. Australian GST will be added, as Livetools is billing you. Training is charged at <span class="num">$450</span> per two-hour session.</p>
+
+  <div class="table-wrap">
+  <table>
+    <caption class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Online proposal pricing, all figures in AUD excluding GST</caption>
+    <thead>
+      <tr>
+        <th scope="col">Item</th>
+        <th scope="col">Allocation</th>
+        <th scope="col">Delivery</th>
+        <th scope="col">Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Fusion CAM training, sessions 1 to 16</td>
+        <td class="sub">16 sessions, 32 hours</td>
+        <td class="sub">Online</td>
+        <td class="figure">$7,200</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  </section>
+
   <div class="next">
   <p>Questions, flick me an email at <a href="mailto:scott@livetools.com.au">scott@livetools.com.au</a>.</p>
   </div>
 
 </main>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('[role="tab"]'));
+  var dated=[].slice.call(document.querySelectorAll('[data-version]'));
+
+  function show(id,focus){
+    tabs.forEach(function(t){
+      var on=t.getAttribute('aria-controls')===id;
+      t.setAttribute('aria-selected',on?'true':'false');
+      t.tabIndex=on?0:-1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden=!on;
+      if(on&&focus)t.focus();
+    });
+    dated.forEach(function(el){el.hidden=el.getAttribute('data-version')!==id;});
+  }
+
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){
+      var id=t.getAttribute('aria-controls');
+      show(id);
+      try{history.replaceState(null,'','#'+id);}catch(e){}
+    });
+    t.addEventListener('keydown',function(e){
+      var step=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;
+      if(!step)return;
+      e.preventDefault();
+      var next=tabs[(i+step+tabs.length)%tabs.length];
+      show(next.getAttribute('aria-controls'),true);
+    });
+  });
+
+  var start=location.hash.slice(1);
+  if(start==='v1'||start==='v2')show(start);
+})();
+</script>
 
 </body>
 </html>
