@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fusion Training, Post Processors &amp; Support | Scott Moyse</title>
-<meta name="description" content="Autodesk Fusion training, post processor development and ongoing support from Scott Moyse. Expert Elite. Fusion user since it was an Autodesk Labs experiment.">
+<title>Fusion Training, Post Processors &amp; Hourly Help | Scott Moyse</title>
+<meta name="description" content="Autodesk Fusion training, post processor development and expert help by the hour from Scott Moyse. Expert Elite. Fusion user since it was an Autodesk Labs experiment.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Jost:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -97,6 +97,8 @@
     font-size:clamp(1.05rem,2.4vw,1.25rem);
     color:#dde3e8;
   }
+  .hero .price-basis{margin-top:22px;font-size:.98rem;color:#9fb4c4;}
+  .hero .price-basis strong{color:#fff;font-weight:600;}
   .hero-ctas{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap;}
   .btn{
     display:inline-block;
@@ -219,6 +221,7 @@
     .cards{grid-template-columns:repeat(3,1fr);}
     .cards .card:nth-child(3):last-child{grid-column:auto;}
   }
+  .cards.single{grid-template-columns:1fr;max-width:460px;}
   .card{
     background:var(--paper);
     border:1px solid var(--line);
@@ -319,7 +322,7 @@
     <div class="nav-links">
       <a href="#training">Training</a>
       <a href="#posts">Post Processors</a>
-      <a href="#support">Support</a>
+      <a href="#hourly">Hourly</a>
       <a class="cta" href="mailto:scott@livetools.com.au">Email Scott</a>
     </div>
   </div>
@@ -327,13 +330,14 @@
 
 <header class="hero" id="top">
   <div class="hero-inner">
-    <span class="eyebrow">Fusion Training &middot; Post Processors &middot; Support</span>
+    <span class="eyebrow">Fusion Training &middot; Post Processors &middot; Hourly Help</span>
     <h1>You bought Fusion to make parts. Not to fight it.</h1>
-    <p class="lead">I'm Scott Moyse. I've been using Fusion since it was an Autodesk Labs experiment called Inventor Fusion, and I've spent the years since helping machine shops across Australia, New Zealand and well beyond get real work out of it. Faster programming, posts that just run, and someone to call when it misbehaves. That's what's on offer here.</p>
+    <p class="lead">I'm Scott Moyse. I've been using Fusion since it was an Autodesk Labs experiment called Inventor Fusion, and I've spent the years since helping machine shops across Australia, New Zealand and well beyond get real work out of it. Faster programming, posts that just run, and an expert you can book by the hour when it misbehaves. That's what's on offer here.</p>
     <div class="hero-ctas">
       <a class="btn btn-red" href="mailto:scott@livetools.com.au">Email Scott</a>
       <a class="btn btn-ghost" href="#training">See training packages</a>
     </div>
+    <p class="price-basis"><strong>All prices on this page are in Australian dollars (AUD) and exclude GST.</strong></p>
   </div>
 </header>
 
@@ -449,35 +453,25 @@
   </div>
 </section>
 
-<section class="svc" id="support">
+<section class="svc" id="hourly">
   <div class="svc-inner">
-    <span class="tool-tag">T03 &mdash; Support</span>
-    <h2>Someone in your corner when Fusion does something weird</h2>
+    <span class="tool-tag">T03 &mdash; Hourly</span>
+    <h2>Expert help by the hour, booked in advance</h2>
     <div class="svc-intro">
-      <p>Forums and Facebook groups are a lottery and Autodesk tickets are nearly always a frustrating waste of time. When a job's on the machine and something's not right, what you actually want is a straight answer from someone who knows your setup. That's what a retainer gets you: me, already familiar with your shop, your machines and your posts, a known response time away.</p>
+      <p>Sometimes you don't need a package. You've got a tricky part to program, a toolpath that won't behave or a setup you're not sure about, and you just want someone who knows Fusion inside out to work through it with you. I'll do that by the hour.</p>
+      <p>To be straight with you, I don't run a support desk and I can't promise to drop everything when something goes wrong mid-job. Time has to be booked in advance, and I'll fit you in as soon as my schedule allows.</p>
     </div>
-    <div class="cards">
+    <div class="cards single">
       <div class="card">
-        <h3>Light</h3>
-        <p class="for">A safety net for the shop that mostly runs fine.</p>
-        <p>Email support with a response inside one business day. Enough cover to get unstuck when something odd crops up, without paying for help you rarely need, but you will periodically get to pick up on tips and tricks from an expert.</p>
-        <p class="price-note">3-month minimum commitment.</p>
-        <p class="price">$350 per month</p>
-      </div>
-      <div class="card featured">
-        <h3>Standard</h3>
-        <p class="for">For shops leaning on Fusion every day.</p>
-        <p>Same business day response, minor post tweaks included, plus a standing half-hour call every month. That call matters more than it sounds: it's where small issues get caught before they cost you a job.</p>
-        <p class="price">$950 per month</p>
-      </div>
-      <div class="card">
-        <h3>Priority</h3>
-        <p class="for">For shops where machine time is too expensive to wait.</p>
-        <p>A priority channel with a response inside four business hours, post tweaks and workflow reviews included, and a standing one-hour call every month. The closest thing to having me on staff without having me on staff.</p>
-        <p class="price">$2,000 per month</p>
+        <h3>On-Demand Hours</h3>
+        <p class="for">For one-off problems and small jobs.</p>
+        <ul>
+          <li>Booked in advance, no on-call cover</li>
+          <li>Pay only for the time you book</li>
+        </ul>
+        <p class="price">$250 per hour</p>
       </div>
     </div>
-    <p class="svc-note"><strong>A few things worth knowing:</strong> support is subject to fair use and isn't a substitute for training. If the questions are really training questions, a training package is the right tool. Excessive use of support per month, will require an upgrade to the next support tier. Post work included in Standard and Priority applies only to posts I've already built for you, not new development. Choose the appropriate post processor service for new post development.</p>
   </div>
 </section>
 
@@ -505,6 +499,7 @@
       &nbsp;&middot;&nbsp;
       <a href="https://www.linkedin.com/in/scottmoyse/" rel="noopener">LinkedIn</a>
     </span>
+    <span>All prices in AUD, excluding GST.</span>
   </div>
 </footer>
 
