@@ -1,2 +1,4 @@
 User-agent: *
 Disallow: /p/
+
+Sitemap: https://fusioncam.co/sitemap.xml
