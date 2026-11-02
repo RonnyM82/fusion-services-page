@@ -7,24 +7,24 @@
 <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
 <meta name="referrer" content="no-referrer">
 <title>Livetools proposal — Kennewell CNC Machining</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preload" href="/fonts/LivetoolsUniverse.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/livetools-universe.css">
 <style>
 :root{
   --lt-surface-page:#FFFFFF;
-  --lt-surface-subtle:#F8F8F8;
+  --lt-surface-subtle:#F3F3F3;
   --lt-surface-panel:#FFFFFF;
   --lt-surface-shell:#2A2A2A;
   --lt-text-on-shell:#EEEEEE;
   --lt-text-on-shell-muted:#A8A8A8;
-  --lt-text-primary:#2A2A2A;
+  --lt-text-primary:#383838;
+  --lt-text-heading:#333745;
   --lt-text-secondary:#565554;
   --lt-border-interactive:#868686;
   --lt-border-subtle:#DEDEDE;
   --lt-action:#1F1BAB;
-  --lt-action-bg-hover:#180098;
   --lt-text-link:#17058F;
+  --lt-text-link-hover:#07004B;
   --lt-brand-red:#ED1C24;
   --lt-warning-text:#724700;
   --lt-warning-fill:#F5A300;
@@ -38,18 +38,12 @@ body{
   margin:0;
   background:var(--lt-surface-page);
   color:var(--lt-text-primary);
-  font-family:"Inter",Arial,Helvetica,sans-serif;
-  font-feature-settings:"ss02" 1;
+  font-family:"Livetools Universe","Livetools Universe Fallback",Arial,Helvetica,sans-serif;
   font-size:18px;
   line-height:1.6;
 }
 
-.num{font-feature-settings:"ss02" 1,"tnum" 1;}
-
-.mono{
-  font-family:"JetBrains Mono",Cascadia Mono,Consolas,"Courier New",monospace;
-  font-feature-settings:"zero" 1;
-}
+.num{font-variant-numeric:tabular-nums;}
 
 /* ---------- shell ---------- */
 
@@ -72,7 +66,7 @@ body{
   font-weight:900;
   font-size:44px;
   line-height:1.1;
-  letter-spacing:-0.02em;
+  letter-spacing:-0.05em;
   margin:0 0 24px;
   color:var(--lt-text-on-shell);
   max-width:16ch;
@@ -115,22 +109,22 @@ h2{
   font-weight:700;
   font-size:30px;
   line-height:1.2;
-  letter-spacing:-0.015em;
+  letter-spacing:-0.05em;
+  color:var(--lt-text-heading);
   margin:56px 0 20px;
   padding-top:28px;
   border-top:1px solid var(--lt-border-subtle);
 }
 
 h2 .idx{
-  color:var(--lt-action);
-  font-family:"JetBrains Mono",Consolas,monospace;
-  font-feature-settings:"zero" 1;
+  color:var(--lt-text-heading);
   font-size:1em;
   margin-right:14px;
 }
 
 h3{
   font-weight:700;
+  color:var(--lt-text-heading);
   font-size:19px;
   margin:32px 0 6px;
 }
@@ -140,13 +134,14 @@ li{margin-bottom:8px;}
 
 .label{
   font-weight:700;
+  color:var(--lt-text-heading);
   margin-bottom:2px;
 }
 
 /* ---------- price callout ---------- */
 
 .price{
-  border-left:4px solid var(--lt-action);
+  border-left:4px solid var(--lt-text-heading);
   background:var(--lt-surface-subtle);
   padding:16px 20px;
   margin:28px 0;
@@ -154,11 +149,10 @@ li{margin-bottom:8px;}
 }
 
 .price .figure{
-  font-family:"JetBrains Mono",Consolas,monospace;
-  font-feature-settings:"zero" 1,"tnum" 1;
+  font-variant-numeric:tabular-nums;
   font-size:26px;
   font-weight:700;
-  color:var(--lt-action);
+  color:var(--lt-text-heading);
   display:block;
   line-height:1.2;
 }
@@ -195,6 +189,7 @@ table{
 thead th{
   text-align:left;
   font-weight:700;
+  color:var(--lt-text-heading);
   border-bottom:2px solid var(--lt-border-interactive);
   padding:10px 12px;
 }
@@ -212,8 +207,7 @@ tbody tr:nth-child(even){background:var(--lt-surface-subtle);}
 td.figure{
   text-align:right;
   white-space:nowrap;
-  font-family:"JetBrains Mono",Consolas,monospace;
-  font-feature-settings:"zero" 1,"tnum" 1;
+  font-variant-numeric:tabular-nums;
   font-weight:500;
 }
 
@@ -241,7 +235,7 @@ td.sub{color:var(--lt-text-secondary);font-size:16px;}
 }
 
 a{color:var(--lt-text-link);}
-a:hover{color:var(--lt-action-bg-hover);}
+a:hover{color:var(--lt-text-link-hover);}
 a:focus-visible{outline:3px solid var(--lt-action);outline-offset:2px;}
 
 .secondary{color:var(--lt-text-secondary);}

@@ -21,18 +21,20 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preload" href="/fonts/LivetoolsUniverse.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/livetools-universe.css">
 <style>
 /* Livetools palette and type, matching the proposal and handover pages. Light only, like them. */
 :root{
-  --bg:#F8F8F8; --surface:#FFFFFF; --surface-2:#EEEEEE; --ink:#2A2A2A; --muted:#565554; --rule:#DEDEDE;
+  --bg:#F3F3F3; --surface:#FFFFFF; --surface-2:#EEEEEE; --ink:#383838; --heading:#333745; --muted:#565554; --rule:#DEDEDE; --edge:#868686;
   --term-bg:#2A2A2A; --term-ink:#EEEEEE; --term-dim:#A8A8A8; --term-ok:#9AD8A2; --term-err:#FFABA1;
   --l0:#1F1BAB; --l1:#ED1C24; --l2:#0B8535; --l3:#7A00D3; --merge:#868686; --on-accent:#FFFFFF;
   --l1-strong:#D9000A; --amber:#F5A300;
-  --link:#17058F; --link-hover:#180098;
+  --link:#17058F; --link-hover:#07004B;
   --focus:#1F1BAB;
-  --sans:"Inter", Arial, Helvetica, sans-serif;
-  --cond:"Inter", Arial, Helvetica, sans-serif;
+  --sans:"Livetools Universe", "Livetools Universe Fallback", Arial, Helvetica, sans-serif;
+  --cond:"Livetools Universe", "Livetools Universe Fallback", Arial, Helvetica, sans-serif;
   --mono:"JetBrains Mono", "Cascadia Mono", Consolas, "Courier New", monospace;
   color-scheme:light;
   box-sizing:border-box;
@@ -41,7 +43,7 @@
 }
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-feature-settings:"ss02" 1;font-size:17px;line-height:1.62}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.62}
 img,svg{max-width:100%}
 a{color:var(--link)}
 a:hover{color:var(--link-hover)}
@@ -53,18 +55,18 @@ p code,li code,dd code,td code{background:var(--surface-2);padding:1px 5px;borde
 .page::before{content:"";position:absolute;left:44px;top:72px;bottom:120px;width:4px;border-radius:2px;background:var(--l0)}
 .station{position:absolute;left:-66px;top:6px;width:32px;height:32px;border-radius:50%;
   background:var(--surface);border:4px solid var(--l0);display:grid;place-items:center;
-  font:500 13px/1 var(--mono);color:var(--ink)}
+  font:500 13px/1 var(--sans);color:var(--ink)}
 .station.start{background:var(--l0);width:36px;height:36px;left:-68px;top:10px}
 .station.end{top:2px}
 
 .hero{position:relative;max-width:46rem}
-h1{font-family:var(--cond);font-weight:900;font-size:clamp(2.4rem,6vw,3.8rem);line-height:1.05;letter-spacing:-.02em;margin:0 0 24px}
+h1{font-family:var(--cond);font-weight:900;font-size:clamp(2.4rem,6vw,3.8rem);line-height:1.05;letter-spacing:-.05em;color:var(--heading);margin:0 0 24px}
 .lede{font-size:1.2rem;line-height:1.55;margin:0 0 16px;max-width:40rem}
 .muted{color:var(--muted)}
 
 section.chapter{position:relative;margin-top:96px}
-h2{font-family:var(--cond);font-weight:700;font-size:clamp(1.6rem,3.4vw,2rem);line-height:1.2;margin:0 0 18px;letter-spacing:-.015em}
-h3{font-size:1.02rem;font-weight:600;margin:0 0 4px}
+h2{font-family:var(--cond);font-weight:700;font-size:clamp(1.6rem,3.4vw,2rem);line-height:1.2;margin:0 0 18px;letter-spacing:-.05em;color:var(--heading)}
+h3{font-size:1.02rem;font-weight:600;margin:0 0 4px;color:var(--heading)}
 .prose{max-width:40rem}
 .prose p{margin:0 0 16px}
 .hint{max-width:40rem;margin:20px 0 0;padding:12px 16px;border-left:4px solid var(--merge);background:var(--surface);border-radius:0 8px 8px 0}
@@ -86,16 +88,16 @@ h3{font-size:1.02rem;font-weight:600;margin:0 0 4px}
 .lab-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
 .lab-title{font-weight:600}
 .lab-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
-.btn{font:500 .9rem/1.2 var(--sans);color:var(--ink);background:var(--surface-2);border:1px solid var(--rule);
+.btn{font:500 .9rem/1.2 var(--sans);color:var(--ink);background:var(--surface-2);border:1px solid var(--edge);
   border-radius:8px;padding:8px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-.btn:hover:not(:disabled){border-color:var(--muted)}
+.btn:hover:not(:disabled){border-color:var(--ink)}
 .btn code{font-size:12px;opacity:.72;background:none;padding:0}
 .btn.primary{background:var(--l0);border-color:var(--l0);color:var(--on-accent)}
 .btn.small{padding:4px 9px;font-size:.82rem}
 .btn.quiet{background:transparent}
 .btn:disabled{opacity:.42;cursor:not-allowed}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-select,input[type=text]{font:inherit;font-size:.9rem;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:8px;padding:7px 9px}
+select,input[type=text]{font:inherit;font-size:.9rem;color:var(--ink);background:var(--surface);border:1px solid var(--edge);border-radius:8px;padding:7px 9px}
 .inline{display:inline-flex;align-items:center;gap:6px;font-size:.9rem}
 
 .term{background:var(--term-bg);color:var(--term-ink);font:13.5px/1.55 var(--mono);border-radius:10px;padding:12px 14px;
@@ -150,7 +152,7 @@ select,input[type=text]{font:inherit;font-size:.9rem;color:var(--ink);background
 .flow::before{content:"";position:absolute;left:11px;top:14px;bottom:14px;width:4px;border-radius:2px;background:var(--l1)}
 .flow li{position:relative;padding:0 0 26px;counter-increment:s}
 .flow li::before{content:counter(s);position:absolute;left:-36px;top:0;width:26px;height:26px;border-radius:50%;
-  background:var(--surface);border:3px solid var(--l1);display:grid;place-items:center;font:500 12px/1 var(--mono)}
+  background:var(--surface);border:3px solid var(--l1);display:grid;place-items:center;font:500 12px/1 var(--sans)}
 .flow h3{font-size:1.05rem;margin:0 0 4px;padding-top:1px}
 .flow p{margin:0 0 8px}
 

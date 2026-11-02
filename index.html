@@ -114,20 +114,37 @@
 }
 </script>
 <script>document.documentElement.className += ' js';</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Jost:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="preload" href="/fonts/LivetoolsUniverse.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/livetools-universe.css">
 <style>
   :root{
+    /* Livetools marketing colours (livetools.com.au). Red is the brand mark
+       only; blue is what you click, and turns the website's red under the pointer. */
     --red:#ed1c24;
-    --navy:#0d436b;
-    --ink:#101820;
+    --blue:#1F1BAB;
+    --blue-hover:#E50019;
+    --link:#17058F;
+    --link-hover:#07004B;
+    --ink:#383838;
+    --heading:#333745;
+    --band:#2A2A2A;
+    --band-2:#444444;
+    --band-light:#E6E6E6;
+    --on-band:#EBEBEB;
+    --on-band-muted:#BEBEBE;
+    --edge:#868686;
+    /* The quote tabs on the grey band. */
+    --tab-rule:rgba(255,255,255,.18);
+    --tab-text:#BEBEBE;
+    --tab-text-hover:#EBEBEB;
+    --tab-text-open:#FFFFFF;
+    --tab-edge-open:#FFFFFF;
     --paper:#ffffff;
-    --paper-dim:#f4f5f7;
-    --grey:#5b6770;
-    --line:#d8dce0;
-    --display:'Rajdhani','Arial Narrow',Arial,sans-serif;
-    --body:'Jost','Segoe UI',Helvetica,Arial,sans-serif;
+    --paper-dim:#F3F3F3;
+    --grey:#565554;
+    --line:#DEDEDE;
+    --display:"Livetools Universe","Livetools Universe Fallback",Arial,Helvetica,sans-serif;
+    --body:"Livetools Universe","Livetools Universe Fallback",Arial,Helvetica,sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;scroll-padding-top:76px;}
@@ -145,9 +162,11 @@
   }
 
   /* ---------- Nav ---------- */
+  /* The design system's light grey band: dark words, and the red logo on
+     grey clears 3:1. */
   .nav{
     position:sticky;top:0;z-index:50;
-    background:var(--ink);
+    background:var(--band-light);
     border-bottom:3px solid var(--red);
   }
   .nav-inner{
@@ -159,18 +178,21 @@
   .nav-name img{display:block;height:30px;width:auto;}
   .nav-links{display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
   .nav-links a{
-    font-family:var(--display);font-weight:600;font-size:1rem;
+    font-family:var(--display);font-weight:700;font-size:1rem;
     letter-spacing:.05em;text-transform:uppercase;
-    color:#c9d1d6;text-decoration:none;
+    color:var(--heading);text-decoration:none;
     padding:10px 12px;border-radius:3px;
   }
-  .nav-links a:hover,.nav-links a:focus-visible{color:#fff;background:rgba(255,255,255,.08);}
+  .nav-links a:hover,.nav-links a:focus-visible{color:var(--band);background:var(--line);}
+  /* A second-level call to action: the outlined secondary button. */
   .nav-links a.cta{
-    background:var(--red);color:#fff;
-    padding:10px 18px;margin-left:6px;
+    display:inline-flex;align-items:center;height:40px;
+    color:var(--heading);margin-left:6px;padding:0 18px;
+    border:1px solid var(--edge);border-radius:0;
   }
-  .nav-links a.cta:hover,.nav-links a.cta:focus-visible{background:#c81017;}
-  a:focus-visible{outline:3px solid var(--red);outline-offset:2px;}
+  .nav-links a.cta:hover,.nav-links a.cta:focus-visible{background:var(--line);border-color:var(--band);}
+  a:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
+  .hero a:focus-visible,.proof a:focus-visible,.onsite a:focus-visible,footer a:focus-visible{outline-color:#fff;}
   @media (max-width:640px){
     .nav-inner{flex-direction:column;align-items:stretch;padding:12px 16px;}
     .nav-name{align-self:center;}
@@ -181,7 +203,7 @@
 
   /* ---------- Hero ---------- */
   .hero{
-    background:var(--ink);
+    background:var(--band);
     color:#fff;
     padding:72px 20px 64px;
   }
@@ -189,7 +211,7 @@
   .eyebrow{
     font-family:var(--display);font-weight:600;
     font-size:.95rem;letter-spacing:.18em;text-transform:uppercase;
-    color:var(--red);
+    color:var(--on-band-muted);
     display:block;margin-bottom:14px;
   }
   .hero h1{
@@ -201,27 +223,48 @@
   .hero p.lead{
     margin-top:22px;max-width:58ch;
     font-size:clamp(1.05rem,2.4vw,1.25rem);
-    color:#dde3e8;
+    color:var(--on-band);
   }
-  .hero .price-basis{margin-top:22px;font-size:.98rem;color:#9fb4c4;}
+  .hero .price-basis{margin-top:22px;font-size:.98rem;color:var(--on-band-muted);}
   .hero .price-basis strong{color:#fff;font-weight:600;}
   .hero-ctas{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap;}
+  /* The website's hero button size: 58px tall, light 24px words, square corners. */
   .btn{
-    display:inline-block;
-    font-family:var(--display);font-weight:700;
-    font-size:1.1rem;letter-spacing:.07em;text-transform:uppercase;
-    text-decoration:none;
-    padding:15px 28px;border-radius:3px;
-    border:2px solid transparent;
+    display:inline-flex;align-items:center;justify-content:center;
+    height:58px;min-width:180px;padding:0 32px;
+    font-family:var(--display);font-weight:300;
+    font-size:1.5rem;line-height:2rem;
+    text-decoration:none;white-space:nowrap;
+    border:1px solid transparent;border-radius:0;
   }
-  .btn-red{background:var(--red);color:#fff;}
-  .btn-red:hover,.btn-red:focus-visible{background:#c81017;}
-  .btn-ghost{border-color:#5b6770;color:#fff;}
+  .btn-cta{--cta-height:58px;color:#fff;padding-right:calc(32px + var(--cta-run) / 2);}
+  /* The call to action, as the design system's Marketing theme draws it: brand
+     blue with the right edge cut back by its height x tan(20deg), the website's
+     red under the pointer, and a 2px lift. The extra right padding keeps the
+     room after the words equal to the room before them. */
+  .btn-cta{
+    --cta-run:calc(var(--cta-height) * tan(20deg));
+    position:relative;isolation:isolate;
+    transition:transform .2s ease;
+  }
+  .btn-cta::before{
+    content:"";position:absolute;inset:0;z-index:-1;
+    background:var(--blue);
+    clip-path:polygon(0 0,100% 0,calc(100% - var(--cta-run)) 100%,0 100%);
+    transition:background-color .15s ease;
+  }
+  .btn-cta:hover::before,.btn-cta:focus-visible::before{background:var(--blue-hover);}
+  .btn-cta:hover{transform:translateY(-2px);}
+  @media (forced-colors:active){
+    .btn-cta::before{display:none;}
+    .btn-cta{border:1px solid ButtonBorder;}
+  }
+  .btn-ghost{border-color:var(--edge);color:#fff;font-weight:400;}
   .btn-ghost:hover,.btn-ghost:focus-visible{border-color:#fff;}
 
   /* ---------- Proof strip ---------- */
   .proof{
-    background:var(--navy);color:#fff;
+    background:var(--band-2);color:#fff;
     padding:40px 20px;
   }
   .proof-inner{max-width:1080px;margin:0 auto;}
@@ -239,14 +282,14 @@
   }
   .proof li{
     padding-left:22px;position:relative;
-    font-size:1.05rem;color:#e6ebef;
+    font-size:1.05rem;color:var(--on-band);
     break-inside:avoid;
     margin-bottom:10px;
   }
-  .proof li a{color:#fff;text-decoration:underline;text-decoration-color:var(--red);text-decoration-thickness:2px;text-underline-offset:3px;}
-  .proof li a:hover,.proof li a:focus-visible{text-decoration-color:#fff;}
-  .svc-intro a{color:var(--navy);text-decoration:underline;text-decoration-color:var(--red);text-decoration-thickness:2px;text-underline-offset:3px;}
-  .svc-intro a:hover,.svc-intro a:focus-visible{color:var(--red);}
+  .proof li a{color:var(--on-band-muted);text-decoration:underline;text-underline-offset:3px;}
+  .proof li a:hover,.proof li a:focus-visible{color:var(--on-band);}
+  .svc-intro a{color:var(--link);text-decoration:underline;text-underline-offset:3px;}
+  .svc-intro a:hover,.svc-intro a:focus-visible{color:var(--link-hover);}
   .proof li::before{
     content:"";position:absolute;left:0;top:.55em;
     width:12px;height:3px;background:var(--red);
@@ -256,19 +299,19 @@
   .quote-tabs{
     display:none;
     margin-top:38px;gap:4px;flex-wrap:wrap;
-    border-bottom:1px solid rgba(255,255,255,.18);
+    border-bottom:1px solid var(--tab-rule);
   }
   .js .quote-tabs{display:flex;}
   .quote-tabs button{
     font-family:var(--display);font-weight:600;
     font-size:1rem;letter-spacing:.08em;text-transform:uppercase;
-    color:#bcd0e0;background:none;cursor:pointer;
+    color:var(--tab-text);background:none;cursor:pointer;
     border:0;border-bottom:3px solid transparent;
     padding:10px 14px;margin-bottom:-1px;
   }
-  .quote-tabs button:hover{color:#fff;}
-  .quote-tabs button[aria-selected="true"]{color:#fff;border-bottom-color:var(--red);}
-  .quote-tabs button:focus-visible{outline:3px solid var(--red);outline-offset:2px;}
+  .quote-tabs button:hover{color:var(--tab-text-hover);}
+  .quote-tabs button[aria-selected="true"]{color:var(--tab-text-open);border-bottom-color:var(--tab-edge-open);}
+  .quote-tabs button:focus-visible{outline:3px solid #fff;outline-offset:2px;}
   @media (max-width:420px){
     .quote-tabs button{font-size:.9rem;padding:10px 8px;letter-spacing:.05em;}
   }
@@ -304,7 +347,7 @@
     border:0;margin:0;padding:0;
   }
   .quote .context{
-    margin-top:14px;font-size:.98rem;color:#bcd0e0;
+    margin-top:14px;font-size:.98rem;color:var(--on-band-muted);
   }
   .quote .who{
     margin-top:auto;padding-top:20px;
@@ -314,10 +357,9 @@
   }
   .quote .who small{
     display:block;font-family:var(--body);font-weight:400;
-    font-size:.85rem;color:#9fb4c4;
+    font-size:.85rem;color:var(--on-band-muted);
     letter-spacing:0;text-transform:none;
   }
-
   /* ---------- Sections ---------- */
   section.svc{padding:64px 20px;}
   section.svc.dim{background:var(--paper-dim);}
@@ -325,12 +367,12 @@
   .tool-tag{
     font-family:var(--display);font-weight:600;
     font-size:.95rem;letter-spacing:.18em;text-transform:uppercase;
-    color:var(--red);display:block;margin-bottom:10px;
+    color:var(--grey);display:block;margin-bottom:10px;
   }
   section.svc h2{
     font-family:var(--display);font-weight:700;text-transform:uppercase;
     font-size:clamp(1.9rem,4.5vw,2.7rem);line-height:1.1;
-    color:var(--ink);
+    color:var(--heading);
   }
   section.svc h2::after{
     content:"";display:block;width:64px;height:4px;
@@ -356,7 +398,7 @@
   .card{
     background:var(--paper);
     border:1px solid var(--line);
-    border-top:4px solid var(--navy);
+    border-top:4px solid var(--band);
     border-radius:4px;
     padding:26px 24px 22px;
     display:flex;flex-direction:column;
@@ -365,6 +407,7 @@
   .card.featured{border-top-color:var(--red);}
   .card h3{
     font-family:var(--display);font-weight:700;text-transform:uppercase;
+    color:var(--heading);
     font-size:1.35rem;letter-spacing:.03em;line-height:1.15;
   }
   .card .for{
@@ -386,7 +429,7 @@
     margin-top:auto;padding-top:20px;
     font-family:var(--display);font-weight:700;
     font-size:1.35rem;line-height:1.1;letter-spacing:.04em;
-    color:var(--navy);
+    color:var(--heading);
   }
   .card .price-note{
     margin-top:auto;padding-top:20px;
@@ -401,11 +444,11 @@
     margin-top:28px;max-width:64ch;
     font-size:1rem;color:var(--grey);
   }
-  .svc-note strong{color:var(--ink);}
+  .svc-note strong{color:var(--heading);}
 
   /* ---------- Onsite strip ---------- */
   .onsite{
-    background:var(--ink);color:#fff;
+    background:var(--band);color:#fff;
     padding:48px 20px;
   }
   .onsite-inner{max-width:1080px;margin:0 auto;}
@@ -413,7 +456,7 @@
     font-family:var(--display);font-weight:700;text-transform:uppercase;
     font-size:1.7rem;letter-spacing:.04em;
   }
-  .onsite p{margin-top:14px;max-width:62ch;color:#dde3e8;font-size:1.05rem;}
+  .onsite p{margin-top:14px;max-width:62ch;color:var(--on-band);font-size:1.05rem;}
 
   /* ---------- Questions ---------- */
   .faq{margin-top:30px;max-width:68ch;}
@@ -428,13 +471,14 @@
   .faq summary::after{
     content:"+";flex-shrink:0;
     font-family:var(--display);font-weight:700;font-size:1.7rem;line-height:1;
-    color:var(--red);
+    color:var(--blue);
   }
   .faq details[open] summary::after{content:"\2212";}
-  .faq summary:hover h3{color:var(--navy);}
-  .faq summary:focus-visible{outline:3px solid var(--red);outline-offset:2px;}
+  .faq summary:hover h3{color:var(--blue);}
+  .faq summary:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
   .faq h3{
     font-family:var(--display);font-weight:700;text-transform:uppercase;
+    color:var(--heading);
     font-size:1.25rem;letter-spacing:.03em;line-height:1.2;
   }
   .faq details p{margin:0 0 20px;font-size:1.05rem;}
@@ -447,6 +491,7 @@
   .closer-inner{max-width:760px;margin:0 auto;}
   .closer h2{
     font-family:var(--display);font-weight:700;text-transform:uppercase;
+    color:var(--heading);
     font-size:clamp(1.9rem,4.5vw,2.6rem);line-height:1.12;
   }
   .closer p{margin-top:18px;font-size:1.1rem;max-width:54ch;margin-left:auto;margin-right:auto;}
@@ -454,20 +499,21 @@
 
   /* ---------- Footer ---------- */
   footer{
-    background:var(--ink);color:#9aa6ad;
+    background:var(--band);color:var(--on-band-muted);
     padding:34px 20px;font-size:.95rem;
   }
   .foot-inner{
     max-width:1080px;margin:0 auto;
     display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
   }
-  footer a{color:#fff;}
+  footer a{color:var(--on-band-muted);}
+  footer a:hover{color:var(--on-band);}
   .foot-links{flex-basis:100%;}
   .foot-name{
     font-family:var(--display);font-weight:700;text-transform:uppercase;
     letter-spacing:.06em;color:#fff;
   }
-  .foot-name span{color:var(--red);}
+  .foot-name span{color:#fff;}
 </style>
 </head>
 <body>
@@ -491,8 +537,8 @@
     <h1>You bought Fusion to make parts. Not to fight it.</h1>
     <p class="lead">I'm Scott Moyse, from Livetools, based in Christchurch. I've been using Autodesk Fusion (Fusion 360 to most of us) since it was an Autodesk Labs experiment called Inventor Fusion, and I've spent the years since helping machine shops across Australia, New Zealand and well beyond get real work out of it. Faster programming, posts that just run, and an expert you can book by the hour when it misbehaves. I'll come to your shop anywhere in New Zealand or Australia. Remote works, but training and proving out posts are always better in person.</p>
     <div class="hero-ctas">
-      <a class="btn btn-red" href="mailto:scott@livetools.com.au">Email Scott</a>
       <a class="btn btn-ghost" href="#training">See training packages</a>
+      <a class="btn btn-cta" href="mailto:scott@livetools.com.au">Email Scott</a>
     </div>
     <p class="price-basis"><strong>All prices on this page are in Australian dollars (AUD) and exclude GST.</strong></p>
   </div>
@@ -536,6 +582,11 @@
       </div>
     </div>
     <div class="quotes" role="tabpanel" id="quotes-nz" aria-labelledby="tab-nz">
+      <div class="quote">
+        <blockquote>Scott would be in the top 1 percentile of Autodesk CAD/CAM Knowledge, having him here dramatically accelerated our adoption of CNC, meaning we were producing paid work by the end of the first week.</blockquote>
+        <p class="context">A week on site setting up CAD and CAM for their new 3-axis CNC router: two posts, Woodwork for Inventor and Fusion 3D CAM training, and a speeds and feeds calculator built for their materials.</p>
+        <p class="who">Lewis Northcote<small>Production Manager, Rigg Zschokke, New Zealand</small></p>
+      </div>
       <div class="quote">
         <blockquote>His use of radical candor means he will tell you exactly what is required to achieve your goals. This can be tough to hear at times, but if you understand it comes from a desire to deliver excellence and are willing to listen, you will get results.</blockquote>
         <p class="context">Bruce has worked with Scott on CAD/CAM technical issues and a product design project over the years.</p>
@@ -720,7 +771,7 @@
     <h2>Not sure which one fits? That's normal.</h2>
     <p>Flick me an email with a rough picture of your shop, your machines and what's slowing you down. We'll have a short call, no charge and no obligation, and I'll tell you straight which package fits, or quote a training plan or post built around your shop. And if none of it's right for you, I'll tell you that too.</p>
     <p>The button below starts the email with the headings I need to quote. Fill in what you can.</p>
-    <a class="btn btn-red" href="mailto:scott@livetools.com.au?subject=Quote%20request&amp;body=Machine%20and%20control%3A%0A%0AWhat%20you%20need%20(training%2C%20post%2C%20hourly%20help)%3A%0A%0AOn%20site%20or%20remote%3A%0A%0AWhere%20you%20are%3A%0A%0AHow%20you%20found%20me%3A%0A">Get a quote</a>
+    <a class="btn btn-cta" href="mailto:scott@livetools.com.au?subject=Quote%20request&amp;body=Machine%20and%20control%3A%0A%0AWhat%20you%20need%20(training%2C%20post%2C%20hourly%20help)%3A%0A%0AOn%20site%20or%20remote%3A%0A%0AWhere%20you%20are%3A%0A%0AHow%20you%20found%20me%3A%0A">Get a quote</a>
   </div>
 </section>
 

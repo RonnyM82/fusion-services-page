@@ -19,18 +19,18 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Lead and Lean on an A/C trunnion: an interactive demo. A tool tilted 15 degrees from the surface normal.">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" href="/fonts/LivetoolsUniverse.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/livetools-universe.css">
 <style>
 :root{
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
-  --bg:#eef0f2; --panel:#ffffff; --ink:#1d2229; --ink-2:#5b6470; --line:#d3d8de;
-  --accent:#1f6fe0; --warn:#c9542b; --ok:#2e8b57;
+  --bg:#F3F3F3; --panel:#ffffff; --ink:#383838; --ink-2:#565554; --line:#DEDEDE; --edge:#868686;
+  --accent:#1F1BAB; --warn:#724700; --ok:#2e8b57;
   --n:#2d7bf0; --t:#ef8a2a; --s:#36b37e; --axis:#d63a3a;
   --scene-a:#f6f7f8; --scene-b:#dfe3e8; --grid:#c2c8cf;
-  font-family:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-family:"Livetools Universe","Livetools Universe Fallback",Arial,Helvetica,sans-serif;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -61,14 +61,14 @@ fieldset{border:1px solid var(--line);border-radius:6px;padding:10px 12px 12px;m
 legend{font-size:12.5px;font-weight:600;color:var(--ink-2);padding:0 4px}
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:7px 0}
 .row label{flex:1}
-.row select,.row input[type=number]{width:118px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:4px 6px}
+.row select,.row input[type=number]{width:118px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--edge);border-radius:4px;padding:4px 6px}
 .row input[type=number]{width:72px;text-align:right}
 .slider{display:grid;grid-template-columns:1fr 54px;gap:8px;align-items:center;margin:6px 0 10px}
 .slider .lab{grid-column:1/3;display:flex;justify-content:space-between;font-size:13px}
 .slider output{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
 input[type=range]{width:100%;accent-color:var(--accent)}
 .static{color:var(--ink-2)}
-button{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:5px 10px;cursor:pointer}
+button{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--edge);border-radius:4px;padding:5px 10px;cursor:pointer}
 button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .btns{display:flex;gap:6px;flex-wrap:wrap}

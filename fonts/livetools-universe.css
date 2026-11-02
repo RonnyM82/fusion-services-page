@@ -1,0 +1,25 @@
+/* Livetools Universe, the Livetools brand typeface (SIL Open Font License 1.1,
+   see OFL.txt beside this file). One variable font covering weights 200 to 900,
+   from livetools-dev/livetools-font, fonts/LivetoolsUniverse[opsz,wdth,wght].woff2.
+   Face and fallback as that repo's docs/DESIGN-SYSTEM.md gives them. */
+
+@font-face {
+  font-family: "Livetools Universe";
+  src: url("/fonts/LivetoolsUniverse.woff2") format("woff2-variations"),
+       url("/fonts/LivetoolsUniverse.woff2") format("woff2");
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Arial re-sized to Livetools Universe's widths, so the page doesn't shift
+   when the webfont arrives. Measured on build 0.100. */
+@font-face {
+  font-family: "Livetools Universe Fallback";
+  src: local("Arial"), local("Helvetica Neue"), local("Helvetica");
+  size-adjust: 103.75%;
+  ascent-override: 105.06%;
+  descent-override: 30.84%;
+  line-gap-override: 0%;
+}
