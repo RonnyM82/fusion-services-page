@@ -202,16 +202,33 @@
   }
 
   /* ---------- Hero ---------- */
+  /* The design system's hero with a picture: the photo is decoration under a
+     85% wash, so every word on it is white. The wash is the charcoal band, not
+     the hero grey, and the photo's highlights are pulled down in the file, so
+     the bright windows don't haze over (white words 7:1 or better on the
+     brightest spot). */
   .hero{
-    background:var(--band);
+    position:relative;isolation:isolate;
+    background:var(--band) url("hero-workshop.webp") 60% center / cover no-repeat;
     color:#fff;
     padding:72px 20px 64px;
+  }
+  .hero::before{
+    content:"";position:absolute;inset:0;z-index:-1;
+    background:var(--band);opacity:.85;
+  }
+  @media (max-width:960px){
+    .hero{background-image:url("hero-workshop-960.webp");}
+  }
+  @media (forced-colors:active){
+    .hero{background-image:none;}
+    .hero::before{display:none;}
   }
   .hero-inner{max-width:1080px;margin:0 auto;}
   .eyebrow{
     font-family:var(--display);font-weight:600;
     font-size:.95rem;letter-spacing:.18em;text-transform:uppercase;
-    color:var(--on-band-muted);
+    color:#fff;
     display:block;margin-bottom:14px;
   }
   .hero h1{
@@ -223,9 +240,9 @@
   .hero p.lead{
     margin-top:22px;max-width:58ch;
     font-size:clamp(1.05rem,2.4vw,1.25rem);
-    color:var(--on-band);
+    color:#fff;
   }
-  .hero .price-basis{margin-top:22px;font-size:.98rem;color:var(--on-band-muted);}
+  .hero .price-basis{margin-top:22px;font-size:.98rem;color:#fff;}
   .hero .price-basis strong{color:#fff;font-weight:600;}
   .hero-ctas{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap;}
   /* The website's hero button size: 58px tall, light 24px words, square corners. */
@@ -261,6 +278,8 @@
   }
   .btn-ghost{border-color:var(--edge);color:#fff;font-weight:400;}
   .btn-ghost:hover,.btn-ghost:focus-visible{border-color:#fff;}
+  .hero .btn-ghost{border-color:#fff;}
+  .hero .btn-ghost:hover,.hero .btn-ghost:focus-visible{background:rgba(255,255,255,.12);}
 
   /* ---------- Proof strip ---------- */
   .proof{
