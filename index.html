@@ -37,6 +37,7 @@
       "@id": "https://fusioncam.co/#livetools",
       "name": "Livetools",
       "url": "https://livetools.com.au/",
+      "logo": "https://fusioncam.co/icon-192.png",
       "areaServed": [
         {"@type": "Country", "name": "New Zealand"},
         {"@type": "Country", "name": "Australia"}
@@ -112,6 +113,7 @@
   ]
 }
 </script>
+<script>document.documentElement.className += ' js';</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Jost:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -251,13 +253,34 @@
   }
 
   /* ---------- Testimonials ---------- */
+  .quote-tabs{
+    display:none;
+    margin-top:38px;gap:4px;flex-wrap:wrap;
+    border-bottom:1px solid rgba(255,255,255,.18);
+  }
+  .js .quote-tabs{display:flex;}
+  .quote-tabs button{
+    font-family:var(--display);font-weight:600;
+    font-size:1rem;letter-spacing:.08em;text-transform:uppercase;
+    color:#bcd0e0;background:none;cursor:pointer;
+    border:0;border-bottom:3px solid transparent;
+    padding:10px 14px;margin-bottom:-1px;
+  }
+  .quote-tabs button:hover{color:#fff;}
+  .quote-tabs button[aria-selected="true"]{color:#fff;border-bottom-color:var(--red);}
+  .quote-tabs button:focus-visible{outline:3px solid var(--red);outline-offset:2px;}
+  @media (max-width:420px){
+    .quote-tabs button{font-size:.9rem;padding:10px 8px;letter-spacing:.05em;}
+  }
   .quotes{
-    margin-top:38px;
+    margin-top:24px;
     display:grid;gap:22px;
     grid-template-columns:1fr;
   }
+  .js .quotes:not(.active){display:none;}
   @media (min-width:680px){
     .quotes{grid-template-columns:1fr 1fr;}
+    .quotes .quote:last-child:nth-child(odd){grid-column:1 / -1;}
   }
   .quote{
     background:rgba(255,255,255,.06);
@@ -486,16 +509,16 @@
       <li>Post processors built for clients from the USA to Saudi Arabia since 2015</li>
       <li>Trained hundreds of engineering &amp; manufacturing professionals around the world</li>
     </ul>
-    <div class="quotes">
+    <div class="quote-tabs" role="tablist" aria-label="Customer quotes by region">
+      <button type="button" role="tab" id="tab-au" aria-selected="true" aria-controls="quotes-au">Australia</button>
+      <button type="button" role="tab" id="tab-nz" aria-selected="false" aria-controls="quotes-nz" tabindex="-1">New Zealand</button>
+      <button type="button" role="tab" id="tab-intl" aria-selected="false" aria-controls="quotes-intl" tabindex="-1">International</button>
+    </div>
+    <div class="quotes active" role="tabpanel" id="quotes-au" aria-labelledby="tab-au">
       <div class="quote">
-        <blockquote>The business literally wouldn't have happened without you guys.</blockquote>
-        <p class="context">Erik couldn't machine the ports on his muzzle brakes with the setup he had. A custom post and training got his barrel tuners to market.</p>
-        <p class="who">Erik Cortina<small>Cortina Precision, USA</small></p>
-      </div>
-      <div class="quote">
-        <blockquote>That's massive for me with a small shop like mine.</blockquote>
-        <p class="context">A custom post gave Ariel's 4-axis machines 5-axis capability, removed a manual operation and saved an hour per part.</p>
-        <p class="who">Ariel Banco<small>Custom Plenum Creations, Australia</small></p>
+        <blockquote>Having Scott sit down with us each day, give us three hours of training and one hour of back and forth, just catapulted us into adoption.</blockquote>
+        <p class="context">Scott trained Romar's engineers on modelling, 3D surfacing, five-axis CAM and data management. One engineer who'd never touched CAM is now running five-axis work.</p>
+        <p class="who">Steve Milanoski<small>Head of Advanced Manufacturing, Romar, Australia</small></p>
       </div>
       <div class="quote">
         <blockquote>Your work was very thorough and the GITHUB and record keeping is icing on the cake. Five stars - Recommend.</blockquote>
@@ -503,27 +526,36 @@
         <p class="who">Brett Kennewell<small>Director, Kennewell CNC Machining, Australia</small></p>
       </div>
       <div class="quote">
+        <blockquote>That's massive for me with a small shop like mine.</blockquote>
+        <p class="context">A custom post gave Ariel's 4-axis machines 5-axis capability, removed a manual operation and saved an hour per part.</p>
+        <p class="who">Ariel Banco<small>Custom Plenum Creations, Australia</small></p>
+      </div>
+      <div class="quote">
+        <blockquote>Thanks for coming down and sharing your many years of expertise, it has definitely put us in a much better position to succeed.</blockquote>
+        <p class="who">Adam Cooper<small>5-Axis Machinist, Kennewell CNC Machining, Australia</small></p>
+      </div>
+    </div>
+    <div class="quotes" role="tabpanel" id="quotes-nz" aria-labelledby="tab-nz">
+      <div class="quote">
         <blockquote>His use of radical candor means he will tell you exactly what is required to achieve your goals. This can be tough to hear at times, but if you understand it comes from a desire to deliver excellence and are willing to listen, you will get results.</blockquote>
         <p class="context">Bruce has worked with Scott on CAD/CAM technical issues and a product design project over the years.</p>
         <p class="who">Bruce Burns<small>Director, One Works, Auckland, New Zealand</small></p>
       </div>
-      <div class="quote">
-        <blockquote>Having Scott sit down with us each day, give us three hours of training and one hour of back and forth, just catapulted us into adoption.</blockquote>
-        <p class="context">Scott trained Romar's engineers on modelling, 3D surfacing, five-axis CAM and data management. One engineer who'd never touched CAM is now running five-axis work.</p>
-        <p class="who">Steve Milanoski<small>Head of Advanced Manufacturing, Romar, Australia</small></p>
-      </div>
+    </div>
+    <div class="quotes" role="tabpanel" id="quotes-intl" aria-labelledby="tab-intl">
       <div class="quote">
         <blockquote>I've worked with Scott for almost 10 years across three different organizations, and he's always been my first call when we needed to get more out of our manufacturing systems.</blockquote>
         <p class="context">Remote and on-site CAM training, plus post development for their DMG Mori NTX and DMU 5-axis.</p>
         <p class="who">Trevor Waldmeyer<small>Director, Prototyping and Product Development Core Lab, KAUST, Saudi Arabia</small></p>
       </div>
       <div class="quote">
-        <blockquote>Over the years, your input and advice have helped me do a better job. Your depth of manufacturing and CAM knowledge is a huge asset wherever you go.</blockquote>
-        <p class="who">Craig Chester<small>Principal Product Manager, Fusion Manufacturing, Autodesk</small></p>
+        <blockquote>The business literally wouldn't have happened without you guys.</blockquote>
+        <p class="context">Erik couldn't machine the ports on his muzzle brakes with the setup he had. A custom post and training got his barrel tuners to market.</p>
+        <p class="who">Erik Cortina<small>Cortina Precision, USA</small></p>
       </div>
       <div class="quote">
-        <blockquote>Thanks for coming down and sharing your many years of expertise, it has definitely put us in a much better position to succeed.</blockquote>
-        <p class="who">Adam Cooper<small>5-Axis Machinist, Kennewell CNC Machining, Australia</small></p>
+        <blockquote>Over the years, your input and advice have helped me do a better job. Your depth of manufacturing and CAM knowledge is a huge asset wherever you go.</blockquote>
+        <p class="who">Craig Chester<small>Principal Product Manager, Fusion Manufacturing, Autodesk</small></p>
       </div>
     </div>
   </div>
@@ -721,6 +753,27 @@
         var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         target.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block: 'start'});
       }
+    });
+  });
+
+  var tabs = [].slice.call(document.querySelectorAll('.quote-tabs [role="tab"]'));
+  function showTab(tab){
+    tabs.forEach(function(t){
+      var on = t === tab;
+      t.setAttribute('aria-selected', on);
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).classList.toggle('active', on);
+    });
+  }
+  tabs.forEach(function(tab, i){
+    tab.addEventListener('click', function(){ showTab(tab); });
+    tab.addEventListener('keydown', function(e){
+      var step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if(!step) return;
+      e.preventDefault();
+      var next = tabs[(i + step + tabs.length) % tabs.length];
+      showTab(next);
+      next.focus();
     });
   });
 </script>
