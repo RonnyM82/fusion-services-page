@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thanks | Livetools</title>
+<!-- Where the quote form lands when JavaScript is off. Not for search results. -->
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preload" href="/fonts/LivetoolsUniverse.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/livetools-universe.css">
+<style>
+  /* The homepage's colours, nav and call-to-action button, trimmed to what this page uses. */
+  :root{
+    --red:#ed1c24;
+    --blue:#1F1BAB;
+    --blue-hover:#E50019;
+    --ink:#383838;
+    --heading:#333745;
+    --band-light:#E6E6E6;
+    --paper:#ffffff;
+    --display:"Livetools Universe","Livetools Universe Fallback",Arial,Helvetica,sans-serif;
+    --body:"Livetools Universe","Livetools Universe Fallback",Arial,Helvetica,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:var(--body);
+    color:var(--ink);
+    background:var(--paper);
+    font-size:18px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .nav{background:var(--band-light);border-bottom:3px solid var(--red);}
+  .nav-inner{max-width:1080px;margin:0 auto;padding:14px 20px;}
+  .nav-name{display:inline-block;line-height:0;}
+  .nav-name img{display:block;height:30px;width:auto;}
+  main{max-width:1080px;margin:0 auto;padding:80px 20px 100px;}
+  h1{
+    font-family:var(--display);font-weight:700;text-transform:uppercase;
+    font-size:clamp(2rem,5vw,3rem);line-height:1.1;letter-spacing:.01em;
+    color:var(--heading);
+  }
+  main p{margin-top:18px;max-width:58ch;font-size:1.15rem;}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    height:58px;min-width:180px;padding:0 32px;margin-top:34px;
+    font-family:var(--display);font-weight:300;
+    font-size:1.5rem;line-height:2rem;
+    text-decoration:none;white-space:nowrap;
+    border:1px solid transparent;border-radius:0;
+  }
+  .btn-cta{
+    --cta-height:58px;
+    --cta-run:calc(var(--cta-height) * tan(20deg));
+    color:#fff;padding-right:calc(32px + var(--cta-run) / 2);
+    position:relative;isolation:isolate;
+    transition:transform .2s ease;
+  }
+  .btn-cta::before{
+    content:"";position:absolute;inset:0;z-index:-1;
+    background:var(--blue);
+    clip-path:polygon(0 0,100% 0,calc(100% - var(--cta-run)) 100%,0 100%);
+    transition:background-color .15s ease;
+  }
+  .btn-cta:hover::before,.btn-cta:focus-visible::before{background:var(--blue-hover);}
+  .btn-cta:hover{transform:translateY(-2px);}
+  a:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{transition:none!important;}
+  }
+  @media (forced-colors:active){
+    .btn-cta::before{display:none;}
+    .btn-cta{border:1px solid ButtonBorder;}
+  }
+  @media (max-width:640px){
+    .nav-inner{padding:12px 16px;text-align:center;}
+    .nav-name img{height:24px;}
+    main{padding:56px 16px 72px;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Main">
+  <div class="nav-inner">
+    <a class="nav-name" href="/"><img src="/livetools-logo.webp" alt="Livetools" width="752" height="108"></a>
+  </div>
+</nav>
+
+<main>
+  <h1>Thanks, got it.</h1>
+  <p>Your message is in my inbox. I'll come back to you with a quote or a few questions.</p>
+  <a class="btn btn-cta" href="/">Back to the site</a>
+</main>
+
+</body>
+</html>
