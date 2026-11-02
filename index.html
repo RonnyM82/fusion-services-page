@@ -516,6 +516,34 @@
   .closer p{margin-top:18px;font-size:1.1rem;max-width:54ch;margin-left:auto;margin-right:auto;}
   .closer .btn{margin-top:30px;}
 
+  /* ---------- Email menu ---------- */
+  /* Opens under any email link on computers with a mouse. Phones and tablets
+     keep the plain mail link, which hands straight to their mail app. */
+  .email-menu{
+    position:fixed;z-index:100;width:300px;max-width:calc(100vw - 32px);
+    background:var(--paper);color:var(--ink);text-align:left;
+    border:1px solid var(--line);border-top:3px solid var(--blue);
+    box-shadow:0 10px 30px rgba(0,0,0,.18);
+    padding:6px 0;
+  }
+  .email-menu[hidden]{display:none;}
+  .email-menu__address{
+    padding:8px 16px 10px;border-bottom:1px solid var(--line);margin-bottom:6px;
+    font-size:.9rem;color:var(--grey);overflow-wrap:anywhere;
+  }
+  .email-menu ul{list-style:none;}
+  .email-menu a,.email-menu button{
+    display:flex;align-items:center;gap:12px;width:100%;
+    padding:10px 16px;min-height:44px;
+    font:inherit;font-size:1rem;line-height:1.3;color:var(--heading);
+    text-decoration:none;text-align:left;
+    background:none;border:0;cursor:pointer;
+  }
+  .email-menu a:hover,.email-menu button:hover{background:var(--paper-dim);color:var(--link-hover);}
+  .email-menu a:focus-visible,.email-menu button:focus-visible{outline:3px solid var(--blue);outline-offset:-3px;}
+  .email-menu svg{flex-shrink:0;width:20px;height:20px;}
+  .email-menu__note{display:block;font-size:.85rem;color:var(--grey);}
+
   /* ---------- Quote form ---------- */
   /* Left-aligned inside the centred closer, two columns down to phone width. */
   .quote-form{
@@ -938,6 +966,170 @@
       next.focus();
     });
   });
+
+  // Email menu: on computers with a mouse, an email link opens a small menu to
+  // pick a mail app, Gmail, Outlook or copy the address, because a plain mail
+  // link often opens nothing useful on a PC. Phones and tablets keep the plain
+  // link, which goes straight to their mail app.
+  (function(){
+    var links = [].slice.call(document.querySelectorAll('a[href^="mailto:"]'));
+    if(!links.length || !window.matchMedia) return;
+    var desktop = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+    var icon = function(body, filled){
+      return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" ' +
+        (filled ? 'fill="currentColor">' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">') +
+        body + '</svg>';
+    };
+    // Lucide icons (ISC licence), and the Gmail mark from Simple Icons (CC0).
+    var icons = {
+      mail: icon('<path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/>'),
+      gmail: icon('<path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/>', true),
+      work: icon('<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/>'),
+      home: icon('<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'),
+      copy: icon('<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>'),
+      check: icon('<path d="M20 6 9 17l-5-5"/>')
+    };
+
+    var menu = document.createElement('div');
+    menu.className = 'email-menu';
+    menu.id = 'email-menu';
+    menu.hidden = true;
+    menu.setAttribute('role', 'dialog');
+    menu.setAttribute('aria-label', 'Ways to email Scott');
+    document.body.appendChild(menu);
+
+    var trigger = null, copiedTimer = null;
+
+    // "mailto:a@b.com?subject=Hi" -> {to, subject, body}
+    function parse(href){
+      var rest = href.slice(7), q = rest.indexOf('?');
+      var params = new URLSearchParams(q < 0 ? '' : rest.slice(q + 1));
+      return {to: decodeURIComponent(q < 0 ? rest : rest.slice(0, q)), subject: params.get('subject') || '', body: params.get('body') || ''};
+    }
+    function query(pairs){
+      return pairs.filter(function(p){ return p[1]; })
+        .map(function(p){ return p[0] + '=' + encodeURIComponent(p[1]); }).join('&');
+    }
+    function escape(s){
+      return s.replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+    }
+
+    function build(link){
+      var m = parse(link.getAttribute('href'));
+      var gmail = 'https://mail.google.com/mail/?' + query([['view','cm'],['fs','1'],['to',m.to],['su',m.subject],['body',m.body]]);
+      var compose = query([['to',m.to],['subject',m.subject],['body',m.body]]);
+      var item = function(href, ic, label, note){
+        var external = href.indexOf('mailto:') !== 0;
+        return '<li><a href="' + escape(href) + '"' + (external ? ' target="_blank" rel="noopener"' : '') + '>' +
+          icons[ic] + '<span>' + label + (note ? '<span class="email-menu__note">' + note + '</span>' : '') + '</span></a></li>';
+      };
+      menu.innerHTML =
+        '<div class="email-menu__address">' + escape(m.to) + '</div><ul>' +
+        item(link.getAttribute('href'), 'mail', 'Open in your mail app') +
+        item(gmail, 'gmail', 'Gmail') +
+        item('https://outlook.office.com/mail/deeplink/compose?' + compose, 'work', 'Outlook', 'Work or school account') +
+        item('https://outlook.live.com/mail/0/deeplink/compose?' + compose, 'home', 'Outlook.com / Hotmail', 'Personal account') +
+        '<li><button type="button" data-copy="' + escape(m.to) + '">' + icons.copy + '<span>Copy address</span></button></li></ul>';
+    }
+
+    function place(){
+      if(!trigger) return;
+      var r = trigger.getBoundingClientRect();
+      var w = menu.offsetWidth, h = menu.offsetHeight;
+      var left = Math.min(Math.max(16, r.left), window.innerWidth - w - 16);
+      var top = r.bottom + 8;
+      if(top + h > window.innerHeight - 8 && r.top - h - 8 > 8) top = r.top - h - 8;
+      menu.style.left = left + 'px';
+      menu.style.top = top + 'px';
+    }
+    function items(){ return [].slice.call(menu.querySelectorAll('a, button')); }
+
+    function open(link){
+      if(trigger) close(false);
+      trigger = link;
+      build(link);
+      menu.hidden = false;
+      link.setAttribute('aria-expanded', 'true');
+      place();
+      items()[0].focus();
+    }
+    function close(refocus){
+      if(!trigger) return;
+      menu.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+      if(refocus) trigger.focus();
+      trigger = null;
+      clearTimeout(copiedTimer);
+    }
+
+    function enhance(){
+      links.forEach(function(link){
+        if(desktop.matches){
+          link.setAttribute('aria-haspopup', 'dialog');
+          link.setAttribute('aria-expanded', 'false');
+          link.setAttribute('aria-controls', 'email-menu');
+        } else {
+          ['aria-haspopup','aria-expanded','aria-controls'].forEach(function(a){ link.removeAttribute(a); });
+        }
+      });
+      if(!desktop.matches) close(false);
+    }
+    enhance();
+    if(desktop.addEventListener) desktop.addEventListener('change', enhance);
+
+    links.forEach(function(link){
+      link.addEventListener('click', function(e){
+        if(!desktop.matches) return;
+        e.preventDefault();
+        if(trigger === link) close(true); else open(link);
+      });
+    });
+
+    menu.addEventListener('click', function(e){
+      var copy = e.target.closest('[data-copy]');
+      if(!copy){
+        if(e.target.closest('a')) close(false);
+        return;
+      }
+      var address = copy.getAttribute('data-copy');
+      var done = function(){
+        copy.innerHTML = icons.check + '<span>Copied</span>';
+        clearTimeout(copiedTimer);
+        copiedTimer = setTimeout(function(){ copy.innerHTML = icons.copy + '<span>Copy address</span>'; }, 1800);
+      };
+      if(navigator.clipboard && window.isSecureContext){
+        navigator.clipboard.writeText(address).then(done, function(){});
+      } else {
+        var field = document.createElement('textarea');
+        field.value = address;
+        field.style.position = 'fixed';
+        field.style.opacity = '0';
+        document.body.appendChild(field);
+        field.select();
+        try { if(document.execCommand('copy')) done(); } catch(err){}
+        field.remove();
+        copy.focus();
+      }
+    });
+
+    menu.addEventListener('keydown', function(e){
+      var list = items(), i = list.indexOf(document.activeElement);
+      if(e.key === 'Escape'){ e.preventDefault(); close(true); }
+      else if(e.key === 'ArrowDown'){ e.preventDefault(); list[(i + 1) % list.length].focus(); }
+      else if(e.key === 'ArrowUp'){ e.preventDefault(); list[(i - 1 + list.length) % list.length].focus(); }
+      else if(e.key === 'Home'){ e.preventDefault(); list[0].focus(); }
+      else if(e.key === 'End'){ e.preventDefault(); list[list.length - 1].focus(); }
+    });
+    menu.addEventListener('focusout', function(e){
+      if(trigger && e.relatedTarget && !menu.contains(e.relatedTarget) && e.relatedTarget !== trigger) close(false);
+    });
+    document.addEventListener('click', function(e){
+      if(trigger && !menu.contains(e.target) && !trigger.contains(e.target)) close(false);
+    });
+    window.addEventListener('scroll', place, {passive: true});
+    window.addEventListener('resize', place);
+  })();
 
   // Sends the quote form without leaving the page. With JavaScript off, the form
   // posts normally and the Worker redirects to thanks.html instead.
