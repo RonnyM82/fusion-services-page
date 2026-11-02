@@ -1,0 +1,15 @@
+{
+  "name": "contact-form-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker that emails fusioncam.co form submissions through Resend",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "test-page": "node scripts/serve-test-page.mjs",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.150.0"
+  }
+}

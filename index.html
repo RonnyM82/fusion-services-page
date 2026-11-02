@@ -516,6 +516,70 @@
   .closer p{margin-top:18px;font-size:1.1rem;max-width:54ch;margin-left:auto;margin-right:auto;}
   .closer .btn{margin-top:30px;}
 
+  /* ---------- Email menu ---------- */
+  /* Opens under any email link on computers with a mouse. Phones and tablets
+     keep the plain mail link, which hands straight to their mail app. */
+  .email-menu{
+    position:fixed;z-index:100;width:300px;max-width:calc(100vw - 32px);
+    background:var(--paper);color:var(--ink);text-align:left;
+    border:1px solid var(--line);border-top:3px solid var(--blue);
+    box-shadow:0 10px 30px rgba(0,0,0,.18);
+    padding:6px 0;
+  }
+  .email-menu[hidden]{display:none;}
+  .email-menu__address{
+    padding:8px 16px 10px;border-bottom:1px solid var(--line);margin-bottom:6px;
+    font-size:.9rem;color:var(--grey);overflow-wrap:anywhere;
+  }
+  .email-menu ul{list-style:none;}
+  .email-menu a,.email-menu button{
+    display:flex;align-items:center;gap:12px;width:100%;
+    padding:10px 16px;min-height:44px;
+    font:inherit;font-size:1rem;line-height:1.3;color:var(--heading);
+    text-decoration:none;text-align:left;
+    background:none;border:0;cursor:pointer;
+  }
+  .email-menu a:hover,.email-menu button:hover{background:var(--paper-dim);color:var(--link-hover);}
+  .email-menu a:focus-visible,.email-menu button:focus-visible{outline:3px solid var(--blue);outline-offset:-3px;}
+  .email-menu svg{flex-shrink:0;width:20px;height:20px;}
+  .email-menu__note{display:block;font-size:.85rem;color:var(--grey);}
+
+  /* ---------- Quote form ---------- */
+  /* Left-aligned inside the centred closer, two columns down to phone width. */
+  .quote-form{
+    margin-top:34px;text-align:left;
+    display:grid;grid-template-columns:1fr 1fr;gap:18px 20px;
+  }
+  .quote-form__field{display:flex;flex-direction:column;gap:6px;}
+  .quote-form__field--wide,.quote-form__turnstile,.quote-form__actions{grid-column:1 / -1;}
+  .quote-form label{
+    font-family:var(--display);font-weight:700;font-size:.95rem;
+    letter-spacing:.04em;text-transform:uppercase;color:var(--heading);
+  }
+  .quote-form input,.quote-form select,.quote-form textarea{
+    width:100%;padding:10px 12px;
+    font:inherit;font-size:1rem;color:var(--ink);
+    background:var(--paper);border:1px solid var(--edge);border-radius:0;
+  }
+  .quote-form textarea{resize:vertical;}
+  .quote-form input:focus-visible,.quote-form select:focus-visible,.quote-form textarea:focus-visible{
+    outline:3px solid var(--blue);outline-offset:0;border-color:var(--blue);
+  }
+  .quote-form__actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;}
+  .closer .quote-form .btn{margin-top:0;}
+  button.btn{background:none;cursor:pointer;}
+  button.btn:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
+  button.btn:disabled{opacity:.6;cursor:progress;}
+  .closer .quote-form__status{margin:0;max-width:none;font-size:1rem;}
+  .quote-form__status:empty{display:none;}
+  .quote-form__status[data-state="success"]{color:var(--heading);font-weight:600;}
+  .quote-form__status[data-state="error"]{color:#B3000F;}
+  /* The honeypot, moved off-screen rather than hidden so bots still fill it in. */
+  .quote-form__hp{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;}
+  @media (max-width:640px){
+    .quote-form{grid-template-columns:1fr;}
+  }
+
   /* ---------- Footer ---------- */
   footer{
     background:var(--band);color:var(--on-band-muted);
@@ -785,12 +849,68 @@
   </div>
 </section>
 
-<section class="closer">
+<section class="closer" id="quote">
   <div class="closer-inner">
     <h2>Not sure which one fits? That's normal.</h2>
-    <p>Flick me an email with a rough picture of your shop, your machines and what's slowing you down. We'll have a short call, no charge and no obligation, and I'll tell you straight which package fits, or quote a training plan or post built around your shop. And if none of it's right for you, I'll tell you that too.</p>
-    <p>The button below starts the email with the headings I need to quote. Fill in what you can.</p>
-    <a class="btn btn-cta" href="mailto:scott@livetools.com.au?subject=Quote%20request&amp;body=Machine%20and%20control%3A%0A%0AWhat%20you%20need%20(training%2C%20post%2C%20hourly%20help)%3A%0A%0AOn%20site%20or%20remote%3A%0A%0AWhere%20you%20are%3A%0A%0AHow%20you%20found%20me%3A%0A">Get a quote</a>
+    <p>Flick me a message with a rough picture of your shop, your machines and what's slowing you down. We'll have a short call, no charge and no obligation, and I'll tell you straight which package fits, or quote a training plan or post built around your shop. And if none of it's right for you, I'll tell you that too.</p>
+    <p>The form below asks what I need to quote. Fill in what you can, or email me at <a href="mailto:scott@livetools.com.au">scott@livetools.com.au</a> if you'd rather.</p>
+
+    <!-- Posts to the Cloudflare Worker in _contact-form-worker, which emails it to Scott. -->
+    <form class="quote-form" id="quote-form" action="https://contact-form-worker.livetools.workers.dev/" method="POST">
+      <input type="hidden" name="_subject" value="Quote request">
+
+      <div class="quote-form__field">
+        <label for="qf-name">Name</label>
+        <input id="qf-name" name="name" type="text" autocomplete="name" maxlength="200" required>
+      </div>
+      <div class="quote-form__field">
+        <label for="qf-email">Email</label>
+        <input id="qf-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+      </div>
+      <div class="quote-form__field">
+        <label for="qf-machine">Machine and control</label>
+        <input id="qf-machine" name="machine_and_control" type="text" maxlength="500">
+      </div>
+      <div class="quote-form__field">
+        <label for="qf-location">Where you are</label>
+        <input id="qf-location" name="where_you_are" type="text" maxlength="200">
+      </div>
+      <div class="quote-form__field">
+        <label for="qf-where-work">On site or remote</label>
+        <select id="qf-where-work" name="on_site_or_remote">
+          <option value="">Choose one</option>
+          <option>On site</option>
+          <option>Remote</option>
+          <option>Not sure yet</option>
+        </select>
+      </div>
+      <div class="quote-form__field">
+        <label for="qf-found">How you found me</label>
+        <input id="qf-found" name="how_you_found_me" type="text" maxlength="500">
+      </div>
+      <div class="quote-form__field quote-form__field--wide">
+        <label for="qf-need">What you need (training, post, hourly help)</label>
+        <textarea id="qf-need" name="what_you_need" rows="3" maxlength="5000"></textarea>
+      </div>
+      <div class="quote-form__field quote-form__field--wide">
+        <label for="qf-message">Anything else</label>
+        <textarea id="qf-message" name="message" rows="4" maxlength="5000"></textarea>
+      </div>
+
+      <!-- Honeypot: people never see this, bots fill it in. -->
+      <div class="quote-form__hp" aria-hidden="true">
+        <label for="qf-gotcha">Leave this empty</label>
+        <input id="qf-gotcha" name="_gotcha" type="text" tabindex="-1" autocomplete="off">
+      </div>
+
+      <!-- Turnstile spam check. Stays hidden unless it needs to ask the visitor something. -->
+      <div class="cf-turnstile quote-form__turnstile" data-sitekey="0x4AAAAAAFwWira3xu1eDQZR" data-appearance="interaction-only"></div>
+
+      <div class="quote-form__actions">
+        <button class="btn btn-cta quote-form__submit" type="submit">Get a quote</button>
+        <p class="quote-form__status" role="status" aria-live="polite"></p>
+      </div>
+    </form>
   </div>
 </section>
 
@@ -846,6 +966,215 @@
       next.focus();
     });
   });
+
+  // Email menu: on computers with a mouse, an email link opens a small menu to
+  // pick a mail app, Gmail, Outlook or copy the address, because a plain mail
+  // link often opens nothing useful on a PC. Phones and tablets keep the plain
+  // link, which goes straight to their mail app.
+  (function(){
+    var links = [].slice.call(document.querySelectorAll('a[href^="mailto:"]'));
+    if(!links.length || !window.matchMedia) return;
+    var desktop = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+    var icon = function(body, filled){
+      return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" ' +
+        (filled ? 'fill="currentColor">' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">') +
+        body + '</svg>';
+    };
+    // Lucide icons (ISC licence), and the Gmail mark from Simple Icons (CC0).
+    var icons = {
+      mail: icon('<path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/>'),
+      gmail: icon('<path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/>', true),
+      work: icon('<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/>'),
+      home: icon('<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'),
+      copy: icon('<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>'),
+      check: icon('<path d="M20 6 9 17l-5-5"/>')
+    };
+
+    var menu = document.createElement('div');
+    menu.className = 'email-menu';
+    menu.id = 'email-menu';
+    menu.hidden = true;
+    menu.setAttribute('role', 'dialog');
+    menu.setAttribute('aria-label', 'Ways to email Scott');
+    document.body.appendChild(menu);
+
+    var trigger = null, copiedTimer = null;
+
+    // "mailto:a@b.com?subject=Hi" -> {to, subject, body}
+    function parse(href){
+      var rest = href.slice(7), q = rest.indexOf('?');
+      var params = new URLSearchParams(q < 0 ? '' : rest.slice(q + 1));
+      return {to: decodeURIComponent(q < 0 ? rest : rest.slice(0, q)), subject: params.get('subject') || '', body: params.get('body') || ''};
+    }
+    function query(pairs){
+      return pairs.filter(function(p){ return p[1]; })
+        .map(function(p){ return p[0] + '=' + encodeURIComponent(p[1]); }).join('&');
+    }
+    function escape(s){
+      return s.replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+    }
+
+    function build(link){
+      var m = parse(link.getAttribute('href'));
+      var gmail = 'https://mail.google.com/mail/?' + query([['view','cm'],['fs','1'],['to',m.to],['su',m.subject],['body',m.body]]);
+      var compose = query([['to',m.to],['subject',m.subject],['body',m.body]]);
+      var item = function(href, ic, label, note){
+        var external = href.indexOf('mailto:') !== 0;
+        return '<li><a href="' + escape(href) + '"' + (external ? ' target="_blank" rel="noopener"' : '') + '>' +
+          icons[ic] + '<span>' + label + (note ? '<span class="email-menu__note">' + note + '</span>' : '') + '</span></a></li>';
+      };
+      menu.innerHTML =
+        '<div class="email-menu__address">' + escape(m.to) + '</div><ul>' +
+        item(link.getAttribute('href'), 'mail', 'Open in your mail app') +
+        item(gmail, 'gmail', 'Gmail') +
+        item('https://outlook.office.com/mail/deeplink/compose?' + compose, 'work', 'Outlook', 'Work or school account') +
+        item('https://outlook.live.com/mail/0/deeplink/compose?' + compose, 'home', 'Outlook.com / Hotmail', 'Personal account') +
+        '<li><button type="button" data-copy="' + escape(m.to) + '">' + icons.copy + '<span>Copy address</span></button></li></ul>';
+    }
+
+    function place(){
+      if(!trigger) return;
+      var r = trigger.getBoundingClientRect();
+      var w = menu.offsetWidth, h = menu.offsetHeight;
+      var left = Math.min(Math.max(16, r.left), window.innerWidth - w - 16);
+      var top = r.bottom + 8;
+      if(top + h > window.innerHeight - 8 && r.top - h - 8 > 8) top = r.top - h - 8;
+      menu.style.left = left + 'px';
+      menu.style.top = top + 'px';
+    }
+    function items(){ return [].slice.call(menu.querySelectorAll('a, button')); }
+
+    function open(link){
+      if(trigger) close(false);
+      trigger = link;
+      build(link);
+      menu.hidden = false;
+      link.setAttribute('aria-expanded', 'true');
+      place();
+      items()[0].focus();
+    }
+    function close(refocus){
+      if(!trigger) return;
+      menu.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+      if(refocus) trigger.focus();
+      trigger = null;
+      clearTimeout(copiedTimer);
+    }
+
+    function enhance(){
+      links.forEach(function(link){
+        if(desktop.matches){
+          link.setAttribute('aria-haspopup', 'dialog');
+          link.setAttribute('aria-expanded', 'false');
+          link.setAttribute('aria-controls', 'email-menu');
+        } else {
+          ['aria-haspopup','aria-expanded','aria-controls'].forEach(function(a){ link.removeAttribute(a); });
+        }
+      });
+      if(!desktop.matches) close(false);
+    }
+    enhance();
+    if(desktop.addEventListener) desktop.addEventListener('change', enhance);
+
+    links.forEach(function(link){
+      link.addEventListener('click', function(e){
+        if(!desktop.matches) return;
+        e.preventDefault();
+        if(trigger === link) close(true); else open(link);
+      });
+    });
+
+    menu.addEventListener('click', function(e){
+      var copy = e.target.closest('[data-copy]');
+      if(!copy){
+        if(e.target.closest('a')) close(false);
+        return;
+      }
+      var address = copy.getAttribute('data-copy');
+      var done = function(){
+        copy.innerHTML = icons.check + '<span>Copied</span>';
+        clearTimeout(copiedTimer);
+        copiedTimer = setTimeout(function(){ copy.innerHTML = icons.copy + '<span>Copy address</span>'; }, 1800);
+      };
+      if(navigator.clipboard && window.isSecureContext){
+        navigator.clipboard.writeText(address).then(done, function(){});
+      } else {
+        var field = document.createElement('textarea');
+        field.value = address;
+        field.style.position = 'fixed';
+        field.style.opacity = '0';
+        document.body.appendChild(field);
+        field.select();
+        try { if(document.execCommand('copy')) done(); } catch(err){}
+        field.remove();
+        copy.focus();
+      }
+    });
+
+    menu.addEventListener('keydown', function(e){
+      var list = items(), i = list.indexOf(document.activeElement);
+      if(e.key === 'Escape'){ e.preventDefault(); close(true); }
+      else if(e.key === 'ArrowDown'){ e.preventDefault(); list[(i + 1) % list.length].focus(); }
+      else if(e.key === 'ArrowUp'){ e.preventDefault(); list[(i - 1 + list.length) % list.length].focus(); }
+      else if(e.key === 'Home'){ e.preventDefault(); list[0].focus(); }
+      else if(e.key === 'End'){ e.preventDefault(); list[list.length - 1].focus(); }
+    });
+    menu.addEventListener('focusout', function(e){
+      if(trigger && e.relatedTarget && !menu.contains(e.relatedTarget) && e.relatedTarget !== trigger) close(false);
+    });
+    document.addEventListener('click', function(e){
+      if(trigger && !menu.contains(e.target) && !trigger.contains(e.target)) close(false);
+    });
+    window.addEventListener('scroll', place, {passive: true});
+    window.addEventListener('resize', place);
+  })();
+
+  // Sends the quote form without leaving the page. With JavaScript off, the form
+  // posts normally and the Worker redirects to thanks.html instead.
+  (function(){
+    var form = document.getElementById('quote-form');
+    if(!form || !window.fetch || !window.FormData) return;
+    var button = form.querySelector('.quote-form__submit');
+    var status = form.querySelector('.quote-form__status');
+    var widget = form.querySelector('.cf-turnstile');
+
+    function show(state, text){
+      status.dataset.state = state;
+      status.textContent = text;
+    }
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      if(window.turnstile && !window.turnstile.getResponse(widget)){
+        show('error', 'Just a moment, the spam check is still running. Try again in a few seconds.');
+        return;
+      }
+      button.disabled = true;
+      show('sending', 'Sending…');
+      fetch(form.action, {method:'POST', body:new FormData(form), headers:{Accept:'application/json'}})
+        .then(function(response){
+          return response.json().catch(function(){ return {}; }).then(function(data){
+            if(response.ok && data.ok){
+              form.reset();
+              show('success', "Thanks, your message is on its way. I'll get back to you soon.");
+            } else {
+              show('error', data.error || "Sorry, your message couldn't be sent. Please try again.");
+            }
+          });
+        })
+        .catch(function(){
+          show('error', "Couldn't reach the server. Check your connection and try again.");
+        })
+        .then(function(){
+          // Turnstile tokens only work once, so get a fresh one after every attempt.
+          if(window.turnstile) window.turnstile.reset(widget);
+          button.disabled = false;
+        });
+    });
+  })();
 </script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </body>
 </html>

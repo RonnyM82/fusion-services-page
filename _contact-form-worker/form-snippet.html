@@ -1,0 +1,127 @@
+<!--
+  Quote request form. Paste this into the page where the form should appear.
+
+  Two values to replace before publishing:
+    1. WORKER URL: the form's action attribute below. Use the workers.dev address
+       from `wrangler deploy`, keeping the trailing slash.
+    2. TURNSTILE SITEKEY: the data-sitekey attribute on the cf-turnstile div.
+
+  Styling hooks: .quote-form and its .quote-form__* children. The only style
+  included is the rule that hides the honeypot field, because a visible
+  honeypot would catch real people.
+-->
+<style>
+  .quote-form__hp { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+</style>
+
+<!-- REPLACE 1 of 2: your Worker URL -->
+<form class="quote-form" id="quote-form" action="https://contact-form-worker.YOUR-SUBDOMAIN.workers.dev/" method="POST">
+  <input type="hidden" name="_subject" value="Quote request">
+
+  <div class="quote-form__field">
+    <label for="qf-name">Name</label>
+    <input id="qf-name" name="name" type="text" autocomplete="name" maxlength="200" required>
+  </div>
+
+  <div class="quote-form__field">
+    <label for="qf-email">Email</label>
+    <input id="qf-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+  </div>
+
+  <div class="quote-form__field">
+    <label for="qf-machine">Machine and control</label>
+    <input id="qf-machine" name="machine_and_control" type="text" maxlength="500">
+  </div>
+
+  <div class="quote-form__field">
+    <label for="qf-need">What you need (training, post, hourly help)</label>
+    <textarea id="qf-need" name="what_you_need" rows="3" maxlength="5000"></textarea>
+  </div>
+
+  <div class="quote-form__field">
+    <label for="qf-where-work">On site or remote</label>
+    <select id="qf-where-work" name="on_site_or_remote">
+      <option value="">Choose one</option>
+      <option>On site</option>
+      <option>Remote</option>
+      <option>Not sure yet</option>
+    </select>
+  </div>
+
+  <div class="quote-form__field">
+    <label for="qf-location">Where you are</label>
+    <input id="qf-location" name="where_you_are" type="text" maxlength="200">
+  </div>
+
+  <div class="quote-form__field">
+    <label for="qf-found">How you found me</label>
+    <input id="qf-found" name="how_you_found_me" type="text" maxlength="500">
+  </div>
+
+  <div class="quote-form__field">
+    <label for="qf-message">Anything else</label>
+    <textarea id="qf-message" name="message" rows="5" maxlength="5000"></textarea>
+  </div>
+
+  <!-- Honeypot: people never see this, bots fill it in. -->
+  <div class="quote-form__hp" aria-hidden="true">
+    <label for="qf-gotcha">Leave this empty</label>
+    <input id="qf-gotcha" name="_gotcha" type="text" tabindex="-1" autocomplete="off">
+  </div>
+
+  <!-- REPLACE 2 of 2: your Turnstile sitekey -->
+  <div class="cf-turnstile quote-form__turnstile" data-sitekey="YOUR_TURNSTILE_SITEKEY" data-appearance="interaction-only"></div>
+
+  <button class="quote-form__submit" type="submit">Send</button>
+  <p class="quote-form__status" role="status" aria-live="polite"></p>
+</form>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script>
+  // Sends the form without leaving the page. With JavaScript off, the form posts
+  // normally and the Worker redirects to the thank-you page instead.
+  (function () {
+    var form = document.getElementById("quote-form");
+    if (!form || !window.fetch || !window.FormData) return;
+    var button = form.querySelector(".quote-form__submit");
+    var status = form.querySelector(".quote-form__status");
+    var widget = form.querySelector(".cf-turnstile");
+
+    function show(state, text) {
+      status.dataset.state = state;
+      status.textContent = text;
+    }
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      if (window.turnstile && !window.turnstile.getResponse(widget)) {
+        show("error", "Just a moment, the spam check is still running. Try again in a few seconds.");
+        return;
+      }
+
+      button.disabled = true;
+      show("sending", "Sending…");
+      try {
+        var response = await fetch(form.action, {
+          method: "POST",
+          body: new FormData(form),
+          headers: { Accept: "application/json" },
+        });
+        var data = await response.json().catch(function () { return {}; });
+        if (response.ok && data.ok) {
+          form.reset();
+          show("success", "Thanks, your message is on its way. I'll get back to you soon.");
+        } else {
+          show("error", data.error || "Sorry, your message couldn't be sent. Please try again.");
+        }
+      } catch (err) {
+        show("error", "Couldn't reach the server. Check your connection and try again.");
+      } finally {
+        // Turnstile tokens only work once, so get a fresh one after every attempt.
+        if (window.turnstile) window.turnstile.reset(widget);
+        button.disabled = false;
+      }
+    });
+  })();
+</script>

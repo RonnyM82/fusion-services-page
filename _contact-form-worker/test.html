@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact form test</title>
+  <style>
+    body { font-family: sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
+    .quote-form__field { margin-bottom: 1rem; }
+    .quote-form__field label { display: block; font-weight: bold; }
+    .quote-form__field input, .quote-form__field textarea, .quote-form__field select { width: 100%; box-sizing: border-box; }
+    .quote-form__status[data-state="success"] { color: green; }
+    .quote-form__status[data-state="error"] { color: #b00; }
+  </style>
+</head>
+<body>
+  <h1>Contact form test</h1>
+  <p>Loads <code>form-snippet.html</code>, points it at the local Worker and uses Turnstile's always-pass test sitekey.
+     Run <code>npm run dev</code> and <code>npm run test-page</code>, then open
+     <a href="http://localhost:8788/">http://localhost:8788/</a>.</p>
+  <div id="form-here">Loading the snippet…</div>
+
+  <script>
+    var WORKER_URL = "http://localhost:8787/";
+    var TEST_SITEKEY = "1x00000000000000000000AA";
+
+    fetch("form-snippet.html")
+      .then(function (r) { return r.text(); })
+      .then(function (html) {
+        html = html
+          .replace(/https:\/\/contact-form-worker\.YOUR-SUBDOMAIN\.workers\.dev\//, WORKER_URL)
+          .replace("YOUR_TURNSTILE_SITEKEY", TEST_SITEKEY);
+        var target = document.getElementById("form-here");
+        target.textContent = "";
+        // A contextual fragment runs the snippet's scripts, unlike innerHTML.
+        target.appendChild(document.createRange().createContextualFragment(html));
+      });
+  </script>
+</body>
+</html>
