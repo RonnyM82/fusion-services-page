@@ -1,0 +1,25 @@
+# Local development settings. Copy this file to .dev.vars (which git ignores)
+# before running `npm run dev`. Values here override "vars" in wrangler.jsonc.
+
+# Turnstile test secret that always passes. Pair it with the test sitekey
+# 1x00000000000000000000AA on the page (test.html already uses it).
+# To check the failure path, swap in 2x0000000000000000000000000000000AA,
+# which always fails.
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+
+# Your real Resend API key. Without one, everything works up to the send,
+# which then fails with a 502.
+RESEND_API_KEY=re_replace_me
+
+# Resend's test inbox: accepts mail and delivers it nowhere.
+TO_EMAIL=delivered@resend.dev
+
+# Resend's shared test sender, so local sends work before mail.fusioncam.co is verified.
+FROM_EMAIL=Local test <onboarding@resend.dev>
+
+# The page served by `npm run test-page`.
+ALLOWED_ORIGINS=http://localhost:8788
+# Turnstile's test keys always report this hostname.
+ALLOWED_HOSTNAMES=example.com
+REDIRECT_URL=http://localhost:8788/thanks
+SUBJECT_PREFIX=[local test]
