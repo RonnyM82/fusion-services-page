@@ -516,6 +516,42 @@
   .closer p{margin-top:18px;font-size:1.1rem;max-width:54ch;margin-left:auto;margin-right:auto;}
   .closer .btn{margin-top:30px;}
 
+  /* ---------- Quote form ---------- */
+  /* Left-aligned inside the centred closer, two columns down to phone width. */
+  .quote-form{
+    margin-top:34px;text-align:left;
+    display:grid;grid-template-columns:1fr 1fr;gap:18px 20px;
+  }
+  .quote-form__field{display:flex;flex-direction:column;gap:6px;}
+  .quote-form__field--wide,.quote-form__turnstile,.quote-form__actions{grid-column:1 / -1;}
+  .quote-form label{
+    font-family:var(--display);font-weight:700;font-size:.95rem;
+    letter-spacing:.04em;text-transform:uppercase;color:var(--heading);
+  }
+  .quote-form input,.quote-form select,.quote-form textarea{
+    width:100%;padding:10px 12px;
+    font:inherit;font-size:1rem;color:var(--ink);
+    background:var(--paper);border:1px solid var(--edge);border-radius:0;
+  }
+  .quote-form textarea{resize:vertical;}
+  .quote-form input:focus-visible,.quote-form select:focus-visible,.quote-form textarea:focus-visible{
+    outline:3px solid var(--blue);outline-offset:0;border-color:var(--blue);
+  }
+  .quote-form__actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;}
+  .closer .quote-form .btn{margin-top:0;}
+  button.btn{background:none;cursor:pointer;}
+  button.btn:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
+  button.btn:disabled{opacity:.6;cursor:progress;}
+  .closer .quote-form__status{margin:0;max-width:none;font-size:1rem;}
+  .quote-form__status:empty{display:none;}
+  .quote-form__status[data-state="success"]{color:var(--heading);font-weight:600;}
+  .quote-form__status[data-state="error"]{color:#B3000F;}
+  /* The honeypot, moved off-screen rather than hidden so bots still fill it in. */
+  .quote-form__hp{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;}
+  @media (max-width:640px){
+    .quote-form{grid-template-columns:1fr;}
+  }
+
   /* ---------- Footer ---------- */
   footer{
     background:var(--band);color:var(--on-band-muted);
@@ -785,12 +821,68 @@
   </div>
 </section>
 
-<section class="closer">
+<section class="closer" id="quote">
   <div class="closer-inner">
     <h2>Not sure which one fits? That's normal.</h2>
-    <p>Flick me an email with a rough picture of your shop, your machines and what's slowing you down. We'll have a short call, no charge and no obligation, and I'll tell you straight which package fits, or quote a training plan or post built around your shop. And if none of it's right for you, I'll tell you that too.</p>
-    <p>The button below starts the email with the headings I need to quote. Fill in what you can.</p>
-    <a class="btn btn-cta" href="mailto:scott@livetools.com.au?subject=Quote%20request&amp;body=Machine%20and%20control%3A%0A%0AWhat%20you%20need%20(training%2C%20post%2C%20hourly%20help)%3A%0A%0AOn%20site%20or%20remote%3A%0A%0AWhere%20you%20are%3A%0A%0AHow%20you%20found%20me%3A%0A">Get a quote</a>
+    <p>Flick me a message with a rough picture of your shop, your machines and what's slowing you down. We'll have a short call, no charge and no obligation, and I'll tell you straight which package fits, or quote a training plan or post built around your shop. And if none of it's right for you, I'll tell you that too.</p>
+    <p>The form below asks what I need to quote. Fill in what you can, or email me at <a href="mailto:scott@livetools.com.au">scott@livetools.com.au</a> if you'd rather.</p>
+
+    <!-- Posts to the Cloudflare Worker in _contact-form-worker, which emails it to Scott. -->
+    <form class="quote-form" id="quote-form" action="https://contact-form-worker.livetools.workers.dev/" method="POST">
+      <input type="hidden" name="_subject" value="Quote request">
+
+      <div class="quote-form__field">
+        <label for="qf-name">Name</label>
+        <input id="qf-name" name="name" type="text" autocomplete="name" maxlength="200" required>
+      </div>
+      <div class="quote-form__field">
+        <label for="qf-email">Email</label>
+        <input id="qf-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+      </div>
+      <div class="quote-form__field">
+        <label for="qf-machine">Machine and control</label>
+        <input id="qf-machine" name="machine_and_control" type="text" maxlength="500">
+      </div>
+      <div class="quote-form__field">
+        <label for="qf-location">Where you are</label>
+        <input id="qf-location" name="where_you_are" type="text" maxlength="200">
+      </div>
+      <div class="quote-form__field">
+        <label for="qf-where-work">On site or remote</label>
+        <select id="qf-where-work" name="on_site_or_remote">
+          <option value="">Choose one</option>
+          <option>On site</option>
+          <option>Remote</option>
+          <option>Not sure yet</option>
+        </select>
+      </div>
+      <div class="quote-form__field">
+        <label for="qf-found">How you found me</label>
+        <input id="qf-found" name="how_you_found_me" type="text" maxlength="500">
+      </div>
+      <div class="quote-form__field quote-form__field--wide">
+        <label for="qf-need">What you need (training, post, hourly help)</label>
+        <textarea id="qf-need" name="what_you_need" rows="3" maxlength="5000"></textarea>
+      </div>
+      <div class="quote-form__field quote-form__field--wide">
+        <label for="qf-message">Anything else</label>
+        <textarea id="qf-message" name="message" rows="4" maxlength="5000"></textarea>
+      </div>
+
+      <!-- Honeypot: people never see this, bots fill it in. -->
+      <div class="quote-form__hp" aria-hidden="true">
+        <label for="qf-gotcha">Leave this empty</label>
+        <input id="qf-gotcha" name="_gotcha" type="text" tabindex="-1" autocomplete="off">
+      </div>
+
+      <!-- Turnstile spam check. Stays hidden unless it needs to ask the visitor something. -->
+      <div class="cf-turnstile quote-form__turnstile" data-sitekey="YOUR_TURNSTILE_SITEKEY" data-appearance="interaction-only"></div>
+
+      <div class="quote-form__actions">
+        <button class="btn btn-cta quote-form__submit" type="submit">Get a quote</button>
+        <p class="quote-form__status" role="status" aria-live="polite"></p>
+      </div>
+    </form>
   </div>
 </section>
 
@@ -846,6 +938,51 @@
       next.focus();
     });
   });
+
+  // Sends the quote form without leaving the page. With JavaScript off, the form
+  // posts normally and the Worker redirects to thanks.html instead.
+  (function(){
+    var form = document.getElementById('quote-form');
+    if(!form || !window.fetch || !window.FormData) return;
+    var button = form.querySelector('.quote-form__submit');
+    var status = form.querySelector('.quote-form__status');
+    var widget = form.querySelector('.cf-turnstile');
+
+    function show(state, text){
+      status.dataset.state = state;
+      status.textContent = text;
+    }
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      if(window.turnstile && !window.turnstile.getResponse(widget)){
+        show('error', 'Just a moment, the spam check is still running. Try again in a few seconds.');
+        return;
+      }
+      button.disabled = true;
+      show('sending', 'Sending…');
+      fetch(form.action, {method:'POST', body:new FormData(form), headers:{Accept:'application/json'}})
+        .then(function(response){
+          return response.json().catch(function(){ return {}; }).then(function(data){
+            if(response.ok && data.ok){
+              form.reset();
+              show('success', "Thanks, your message is on its way. I'll get back to you soon.");
+            } else {
+              show('error', data.error || "Sorry, your message couldn't be sent. Please try again.");
+            }
+          });
+        })
+        .catch(function(){
+          show('error', "Couldn't reach the server. Check your connection and try again.");
+        })
+        .then(function(){
+          // Turnstile tokens only work once, so get a fresh one after every attempt.
+          if(window.turnstile) window.turnstile.reset(widget);
+          button.disabled = false;
+        });
+    });
+  })();
 </script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </body>
 </html>

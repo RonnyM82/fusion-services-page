@@ -85,13 +85,12 @@ The non-secret settings live in `wrangler.jsonc` under `vars` (delivery address,
 
 ## 4. Put the form on the page
 
-1. Open `form-snippet.html` and copy everything in it.
-2. Paste it into `index.html` where the form should go.
-3. Replace the two marked values:
-   - the form's `action`: your Worker address from step 3, with a `/` on the end
-   - `data-sitekey`: the Turnstile **Site Key** from step 2
-4. Style it using the `.quote-form` classes.
-5. Commit, merge into `main` and push. GitHub Pages publishes it within a minute or two.
+This is already done in `index.html`: the form is in the closing "Not sure which one fits?" section, styled to match the page, and it posts to `https://contact-form-worker.livetools.workers.dev/`. Its script sits at the bottom of the page with the others.
+
+1. Put the Turnstile **Site Key** from step 2 into the form's `data-sitekey`, in place of `YOUR_TURNSTILE_SITEKEY`.
+2. Commit, merge into `main` and push. GitHub Pages publishes it within a minute or two.
+
+`form-snippet.html` is the same form unstyled, for reuse on another page. If the Worker ever moves to a new address, change the form's `action` in both places.
 
 Then send yourself a real quote request from fusioncam.co. Hitting **Reply** on the email should go straight to the address typed into the form.
 
