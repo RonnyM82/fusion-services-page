@@ -574,6 +574,17 @@
   .quote-form__status:empty{display:none;}
   .quote-form__status[data-state="success"]{color:var(--heading);font-weight:600;}
   .quote-form__status[data-state="error"]{color:#B3000F;}
+  /* Under the email field: a "did you mean" suggestion, or why the address won't work. */
+  .closer .quote-form__hint{margin:0;max-width:none;font-size:.95rem;line-height:1.4;}
+  .quote-form__hint:empty{display:none;}
+  .quote-form__hint[data-state="error"]{color:#B3000F;}
+  .quote-form__hint button{
+    font:inherit;color:var(--link);text-decoration:underline;
+    background:none;border:0;padding:0;cursor:pointer;
+  }
+  .quote-form__hint button:hover{color:var(--link-hover);}
+  .quote-form__hint button:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
+  .quote-form input[aria-invalid="true"]{border-color:#B3000F;}
   /* The honeypot, moved off-screen rather than hidden so bots still fill it in. */
   .quote-form__hp{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;}
   @media (max-width:640px){
@@ -865,7 +876,8 @@
       </div>
       <div class="quote-form__field">
         <label for="qf-email">Email</label>
-        <input id="qf-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+        <input id="qf-email" name="email" type="email" autocomplete="email" maxlength="254" required aria-describedby="qf-email-hint">
+        <p class="quote-form__hint" id="qf-email-hint" aria-live="polite"></p>
       </div>
       <div class="quote-form__field">
         <label for="qf-machine">Machine and control</label>
@@ -1129,6 +1141,136 @@
     });
     window.addEventListener('scroll', place, {passive: true});
     window.addEventListener('resize', place);
+  })();
+
+  // Email field: blocks addresses that can't work, and suggests a fix for common
+  // typos in the domain ("gmial.com", "xtra.co.mz", "acme.con"). The suggestion
+  // never blocks sending, in case the unusual address is the right one.
+  (function(){
+    var input = document.getElementById('qf-email');
+    var hint = document.getElementById('qf-email-hint');
+    if(!input || !hint) return;
+
+    var known = [
+      'gmail.com','googlemail.com','outlook.com','hotmail.com','live.com','msn.com',
+      'yahoo.com','ymail.com','icloud.com','me.com','mac.com','aol.com','mail.com','proton.me','protonmail.com',
+      'xtra.co.nz','slingshot.co.nz','orcon.net.nz','vodafone.co.nz','hotmail.co.nz','yahoo.co.nz',
+      'bigpond.com','bigpond.net.au','optusnet.com.au','iinet.net.au','tpg.com.au','internode.on.net',
+      'outlook.com.au','hotmail.com.au','yahoo.com.au','live.com.au','hotmail.co.uk','yahoo.co.uk'
+    ];
+    // Endings that are almost always a slip of the finger.
+    var endings = [
+      ['.con.au','.com.au'],['.cmo.au','.com.au'],['.co.nx','.co.nz'],['.co.mz','.co.nz'],['.co.nzz','.co.nz'],
+      ['.con','.com'],['.cmo','.com'],['.ocm','.com'],['.vom','.com'],['.xom','.com'],['.cpm','.com'],['.comm','.com'],['.coom','.com']
+    ];
+    var shape = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)*\.([a-z]{2,}|xn--[a-z0-9-]+)$/i;
+
+    // Edits needed to turn a into b, counting a swapped pair of letters as one.
+    function distance(a, b){
+      var d = [], i, j;
+      for(i = 0; i <= a.length; i++){ d[i] = [i]; }
+      for(j = 0; j <= b.length; j++){ d[0][j] = j; }
+      for(i = 1; i <= a.length; i++){
+        for(j = 1; j <= b.length; j++){
+          var cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+          if(i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]){
+            d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+          }
+        }
+      }
+      return d[a.length][b.length];
+    }
+
+    function suggest(address){
+      var at = address.lastIndexOf('@');
+      if(at < 1) return null;
+      var name = address.slice(0, at), domain = address.slice(at + 1).toLowerCase();
+      if(!domain || known.indexOf(domain) > -1) return null;
+
+      // "jo@gmail" with no ending at all.
+      if(domain.indexOf('.') < 0){
+        for(var k = 0; k < known.length; k++){
+          if(known[k].split('.')[0] === domain) return name + '@' + known[k];
+        }
+        return null;
+      }
+
+      var best = null, bestScore = Infinity;
+      known.forEach(function(d){
+        var score = distance(domain, d);
+        if(score < bestScore){ best = d; bestScore = score; }
+      });
+      if(bestScore <= (domain.length >= 9 ? 2 : 1)) return name + '@' + best;
+
+      for(var e = 0; e < endings.length; e++){
+        var wrong = endings[e][0];
+        if(domain.slice(-wrong.length) === wrong) return name + '@' + domain.slice(0, -wrong.length) + endings[e][1];
+      }
+      return null;
+    }
+
+    function problem(value){
+      if(value === '') return 'Please add your email address so I can reply.';
+      if(value.indexOf('@') < 0) return 'Your email address needs an @ in it, like name@company.co.nz.';
+      if(!shape.test(value) || value.indexOf('..') > -1) return "That email address doesn't look complete. Check it's like name@company.co.nz.";
+      return '';
+    }
+
+    function showProblem(text){
+      hint.dataset.state = 'error';
+      hint.textContent = text;
+      input.setAttribute('aria-invalid', 'true');
+    }
+    function clear(){
+      hint.dataset.state = '';
+      hint.textContent = '';
+      input.removeAttribute('aria-invalid');
+    }
+
+    // Keeps the browser's own check in step, so an unworkable address stops the form sending.
+    function validate(){
+      input.setCustomValidity(problem(input.value.trim()));
+    }
+
+    function check(){
+      input.value = input.value.trim();
+      validate();
+      var fix = suggest(input.value);
+      var issue = problem(input.value);
+      if(fix){
+        hint.dataset.state = 'suggest';
+        hint.textContent = 'Did you mean ';
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = fix;
+        button.addEventListener('click', function(){
+          input.value = fix;
+          validate();
+          clear();
+          input.focus();
+        });
+        hint.appendChild(button);
+        hint.appendChild(document.createTextNode('?'));
+        if(issue) input.setAttribute('aria-invalid', 'true'); else input.removeAttribute('aria-invalid');
+      } else if(issue && input.value !== ''){
+        showProblem(issue);
+      } else {
+        clear();
+      }
+    }
+
+    input.addEventListener('input', function(){
+      validate();
+      // Once the address is fixed, take the warning away straight away.
+      if(hint.dataset.state === 'error' && !problem(input.value.trim())) clear();
+    });
+    input.addEventListener('change', check);
+    input.addEventListener('invalid', function(){
+      var issue = problem(input.value.trim());
+      if(issue && input.value.trim() !== '' && hint.dataset.state !== 'suggest') showProblem(issue);
+    });
+    validate();
   })();
 
   // Sends the quote form without leaving the page. With JavaScript off, the form
