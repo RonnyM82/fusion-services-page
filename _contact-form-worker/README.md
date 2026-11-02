@@ -18,16 +18,18 @@ Rule number one: secrets (the Resend API key and the Turnstile secret key) NEVER
 
 1. Create an account at [resend.com](https://resend.com).
 2. Go to **Domains** and add `mail.fusioncam.co`. If it asks for a region, pick whichever is closest to NZ.
-3. Resend shows you a set of DNS records to add (an MX record and a TXT record for sending, plus a TXT record for signing). Add each one at Porkbun under **Domain Management → fusioncam.co → DNS**.
+3. Resend shows you a set of DNS records to add on its **Records** tab. Expect a few TXT records, plus either an MX record or some CNAME records, depending on how Resend sets up the account. Add every record it lists, at Porkbun under **Domain Management → fusioncam.co → DNS**.
 
-   The key thing to understand is that Porkbun adds `.fusioncam.co` to the end of whatever you type in the **Host** box. So type only the part before it:
+   The key thing to understand is that Porkbun adds `.fusioncam.co` to the end of whatever you type in the **Host** box. So type only the part before it. For example:
 
    | Resend shows | Type into Porkbun's Host box |
    |---|---|
    | `send.mail.fusioncam.co` | `send.mail` |
    | `resend._domainkey.mail.fusioncam.co` | `resend._domainkey.mail` |
 
-   Copy the record type, value and priority straight from Resend. Don't retype them.
+   Some screens show the name already shortened (e.g. `send.mail`). Use that as is.
+
+   Copy the record type, value and priority (if there is one) straight from Resend. Don't retype them.
 
    IMPORTANT: leave every existing record alone, especially anything with a blank Host. None of the new records sit on fusioncam.co itself, so they can't affect the root domain's MX or SPF.
 
