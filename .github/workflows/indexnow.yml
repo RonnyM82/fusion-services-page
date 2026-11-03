@@ -1,0 +1,189 @@
+# Tells Bing (and the other IndexNow search engines) which pages changed,
+# but only once GitHub Pages has published them, so the crawler never
+# fetches the old copy.
+#
+# Rules:
+#   - Only URLs listed in sitemap.xml are ever sent.
+#   - Nothing under /p/ is ever sent (private proposals, noindex).
+#   - A push sends only the sitemap pages whose HTML changed in that push.
+#   - A manual run (Actions tab > IndexNow > Run workflow) sends every
+#     sitemap page. Use it sparingly; IndexNow wants changed pages only.
+
+name: IndexNow
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "p/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: read
+
+env:
+  SITE: https://fusioncam.co
+  HOST: fusioncam.co
+  INDEXNOW_KEY: 7bb1b697fdb544007af69ad717a14cfc
+
+jobs:
+  indexnow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Work out which sitemap pages changed
+        id: pages
+        env:
+          BEFORE: ${{ github.event.before }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+
+          # Every <loc> in the sitemap, on this host, outside /p/.
+          grep -o '<loc>[^<]*</loc>' sitemap.xml \
+            | sed -e 's#<loc>##' -e 's#</loc>##' -e 's#[[:space:]]##g' \
+            | awk -v site="$SITE/" -v priv="$SITE/p/" \
+                'index($0, site) == 1 && index($0, priv) != 1' \
+            > sitemap-urls.txt
+
+          # Sitemap URL -> file in the repo: "/" and ".../" mean index.html.
+          url_to_file() {
+            local path="${1#"$SITE"/}"
+            case "$path" in
+              "" ) echo "index.html" ;;
+              */ ) echo "${path}index.html" ;;
+              *  ) echo "$path" ;;
+            esac
+          }
+
+          send_all=false
+          if [ "$EVENT" != "push" ] \
+             || [ -z "$BEFORE" ] \
+             || ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            send_all=true
+          else
+            git diff --name-only "$BEFORE" "$GITHUB_SHA" > changed-files.txt
+          fi
+
+          : > urls.txt
+          : > url-files.txt
+          while read -r url; do
+            [ -n "$url" ] || continue
+            file=$(url_to_file "$url")
+            if [ ! -f "$file" ]; then
+              echo "::warning::$url is in sitemap.xml but $file is not in the repo; skipping it"
+              continue
+            fi
+            if $send_all || grep -qxF "$file" changed-files.txt; then
+              echo "$url" >> urls.txt
+              printf '%s\t%s\n' "$url" "$file" >> url-files.txt
+            fi
+          done < sitemap-urls.txt
+
+          echo "Pages to send:"
+          cat urls.txt
+          echo "count=$(wc -l < urls.txt | tr -d ' ')" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for GitHub Pages to publish this commit
+        if: steps.pages.outputs.count != '0'
+        id: build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # Waits until the latest Pages build is "built" and is this commit
+          # or a later one (a quick second push can replace this build).
+          deadline=$((SECONDS + 20 * 60))
+          while :; do
+            read -r status commit < <(gh api "repos/$GITHUB_REPOSITORY/pages/builds/latest" \
+              --jq '[.status, .commit] | @tsv' || echo "unknown none")
+            echo "Latest Pages build: $status ($commit)"
+            if [ "$status" = "errored" ] && [ "$commit" = "$GITHUB_SHA" ]; then
+              echo "::error::GitHub Pages failed to build this commit; nothing sent"
+              exit 1
+            fi
+            if [ "$status" = "built" ]; then
+              git cat-file -e "${commit}^{commit}" 2>/dev/null || git fetch --quiet origin main || true
+              if git merge-base --is-ancestor "$GITHUB_SHA" "$commit" 2>/dev/null; then
+                echo "commit=$commit" >> "$GITHUB_OUTPUT"
+                break
+              fi
+            fi
+            if [ $SECONDS -ge $deadline ]; then
+              echo "::error::Gave up waiting for GitHub Pages after 20 minutes; nothing sent"
+              exit 1
+            fi
+            sleep 20
+          done
+
+      - name: Wait until the live pages match what was published
+        if: steps.pages.outputs.count != '0'
+        env:
+          PUBLISHED: ${{ steps.build.outputs.commit }}
+        run: |
+          set -euo pipefail
+          # The Pages build finishing is not quite the same as the new copy
+          # being served, so compare each live page with the published file.
+          deadline=$((SECONDS + 15 * 60))
+          while :; do
+            stale=0
+            while IFS=$'\t' read -r url file; do
+              want=$(git show "$PUBLISHED:$file" | sha256sum | cut -d' ' -f1)
+              got=$(curl -fsSL --compressed "$url" | sha256sum | cut -d' ' -f1 || true)
+              if [ "$want" != "$got" ]; then
+                echo "Not live yet: $url"
+                stale=1
+              fi
+            done < url-files.txt
+            [ $stale -eq 0 ] && { echo "All pages are live."; break; }
+            if [ $SECONDS -ge $deadline ]; then
+              echo "::error::Live pages still don't match after 15 minutes; nothing sent"
+              exit 1
+            fi
+            sleep 30
+          done
+
+      - name: Send the pages to IndexNow
+        if: steps.pages.outputs.count != '0'
+        run: |
+          set -euo pipefail
+
+          # Last line of defence: refuse anything off-site or under /p/.
+          bad=$(awk -v site="$SITE/" -v priv="$SITE/p/" \
+                  'index($0, site) != 1 || index($0, priv) == 1' urls.txt)
+          if [ -n "$bad" ]; then
+            echo "$bad"
+            echo "::error::Refusing to send the URLs above"
+            exit 1
+          fi
+
+          # The key file must be live, or IndexNow rejects the request.
+          live_key=$(curl -fsSL "$SITE/$INDEXNOW_KEY.txt" | tr -d '[:space:]' || true)
+          if [ "$live_key" != "$INDEXNOW_KEY" ]; then
+            echo "::error::$SITE/$INDEXNOW_KEY.txt is missing or wrong"
+            exit 1
+          fi
+
+          jq -n --arg host "$HOST" --arg key "$INDEXNOW_KEY" \
+                --arg loc "$SITE/$INDEXNOW_KEY.txt" \
+                --rawfile urls urls.txt \
+                '{host: $host, key: $key, keyLocation: $loc,
+                  urlList: ($urls | split("\n") | map(select(length > 0)))}' \
+            > payload.json
+          cat payload.json
+
+          code=$(curl -sS -o response.txt -w '%{http_code}' \
+            -X POST "https://api.indexnow.org/indexnow" \
+            -H 'Content-Type: application/json; charset=utf-8' \
+            --data-binary @payload.json)
+          echo "IndexNow answered HTTP $code"
+          cat response.txt || true
+          case "$code" in
+            200|202) echo "Sent." ;;
+            *) echo "::error::IndexNow rejected the request (HTTP $code)"; exit 1 ;;
+          esac
